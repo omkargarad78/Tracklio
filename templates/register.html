@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register Form</title>
+    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/register.css') }}"> -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <style>
+        /* General Reset */
+body, html {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+    background-color: #eef2f7;
+}
+
+/* Main container styling */
+.main {
+    width: 100%;
+    max-width: 400px;
+    margin: 100px auto;
+    padding: 25px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.15);
+    text-align: center;
+    transition: all 0.3s ease; /* Smooth transition effect */
+}
+
+/* Hover effect for the main container */
+.main:hover {
+    box-shadow: 0px 12px 30px rgba(0, 0, 0, 0.3); /* Darker shadow */
+    transform: translateY(-5px); /* Moves the form up */
+}
+
+/* Headings */
+.main h3 {
+    font-size: 1.8rem;
+    color: #34495e;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+/* Flash messages */
+.flash-message {
+    padding: 10px;
+    margin: 15px 0;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    color: #ffffff;
+    display: block;
+}
+
+.flash-message.success {
+    background-color: #27ae60; /* Green for success */
+}
+
+.flash-message.danger {
+    background-color: #e74c3c; /* Red for error */
+}
+
+.flash-message.info {
+    background-color: #3498db; /* Blue for info */
+}
+
+.flash-message.warning {
+    background-color: #f39c12; /* Yellow for warnings */
+}
+
+
+/* Form styling */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Labels */
+form label {
+    font-size: 1rem;
+    color: #2c3e50;
+    text-align: left;
+}
+
+/* Input fields */
+form input {
+    width: 89%;
+    padding: 12px;
+    font-size: 1rem;
+    color: #34495e;
+    border: 1px solid #bdc3c7;
+    border-radius: 8px;
+    background: #ecf0f1;
+    transition: all 0.3s ease;
+}
+
+form input:focus {
+    border-color: #3498db;
+    outline: none;
+    background: #ffffff;
+    box-shadow: 0px 4px 10px rgba(52, 152, 219, 0.2);
+}
+
+/* Submit button */
+.wrap button {
+    padding: 12px;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #ffffff;
+    background: #14B8A6;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.wrap button:hover {
+    background: #14B8A6;
+}
+
+/* Bottom text */
+.text-center {
+    font-size: 0.9rem;
+    color: #7f8c8d;
+    margin-top: 15px;
+}
+
+.text-center a {
+    color: #3498db;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+.text-center a:hover {
+    color: #2980b9;
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+    .main {
+        margin: 50px 10px;
+        padding: 20px;
+    }
+    form input, .wrap button {
+        font-size: 0.9rem;
+    }
+    .main h3 {
+        font-size: 1.5rem;
+    }
+}
+
+
+
+
+body {
+        transition: filter 0.3s ease; /* Smooth transition for the blur effect */
+    }
+
+    .loader {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000; /* Ensure loader appears above the blur */
+    }
+
+    .circle {
+        width: 15px;
+        height: 15px;
+        margin: 0 8px;
+        border-radius: 50%;
+        background-color: teal;
+        animation: bounce-wave 1.2s infinite ease-in-out;
+    }
+
+    .circle:nth-child(1) {
+        animation-delay: 0s;
+    }
+
+    .circle:nth-child(2) {
+        animation-delay: 0.3s;
+    }
+
+    .circle:nth-child(3) {
+        animation-delay: 0.6s;
+    }
+
+    @keyframes bounce-wave {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-20px); /* Bouncing effect */
+        }
+    }
+
+    </style>
+</head>
+<body>
+    <div class="main" id="flash-messages">
+        <h3>Register Yourself</h3>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div id="flash-messages-container">
+            {% for category, message in messages %}
+                <div class="flash-message {{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+
+<form action="{{ url_for('register') }}" method="POST" id="register-form">
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username" placeholder="Enter your Username" required>
+    <span id="username-status"></span> <!-- ✅ / ❌ will be shown here -->
+
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" placeholder="Enter your Password" required>
+
+    <div class="wrap">
+        <button type="submit">Register</button>
+    </div>
+</form>
+
+        <div id="loader" class="loader" style="display: none;">
+            <div class="circle"></div>
+            <div class="circle"></div>
+            <div class="circle"></div>
+        </div>
+
+        <p class="text-center">Already have an account? <a href="{{ url_for('login') }}">Login</a></p>
+    </div>
+    
+    <script>
+        document.getElementById("username").addEventListener("input", function() {
+        let username = this.value.trim();
+        let statusSpan = document.getElementById("username-status");
+
+        if (username.length === 0) {
+            statusSpan.innerHTML = ""; 
+            return;
+        }
+
+        fetch("/check_username", {
+            method: "POST",
+            body: JSON.stringify({ username: username }),
+            headers: { "Content-Type": "application/json" }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.exists) {
+                statusSpan.innerHTML = "❌ Username already taken";
+                statusSpan.style.color = "red";
+            } else {
+                statusSpan.innerHTML = "✅ Username available";
+                statusSpan.style.color = "green";
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    });
+
+
+
+
+        // Loader Animation
+        document.getElementById('register-form').onsubmit = function() {
+            document.getElementById('loader').style.display = 'flex'; // Show loader
+
+setTimeout(function() {
+    document.getElementById('loader').style.display = 'none'; // Hide loader after 3 seconds
+}, 2000);
+
+        };
+
+
+
+
+
+        document.addEventListener('DOMContentLoaded', function () {
+    // Show flash messages for only 3 seconds
+    const flashMessages = document.querySelectorAll('.flash-message');
+    
+    flashMessages.forEach(function (message) {
+        setTimeout(() => {
+            message.style.transition = 'opacity 0.5s ease-out';
+            message.style.opacity = '0'; // Fade out
+            setTimeout(() => {
+                message.remove(); // Remove after fade-out
+            }, 500); // Wait for the fade-out animation
+        }, 3000); // Wait for 3 seconds before fading out
+    });
+});
+
+document.getElementById('login-form').onsubmit = function() {
+    document.getElementById('loader').style.display = 'flex'; // Show loader
+
+    setTimeout(function() {
+        document.getElementById('loader').style.display = 'none'; // Hide loader after 3 seconds
+    }, 6000);
+};
+
+    </script>
+</body>
+</html>
+
+
+
+

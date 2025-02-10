@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - Expense Tracker</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <style>
+        body {
+    font-family: Arial, sans-serif;
+    background-color: #ffffff; /* White background */
+    color: #333; /* Dark text */
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: #008080; /* Teal color */
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+}
+
+section {
+    margin: 20px;
+    line-height: 1.6;
+}
+
+h2 {
+    color: #008080; /* Teal color */
+}
+
+.text-sm {
+    font-size: 14px;
+}
+
+.space-y-2 {
+    margin-bottom: 1rem;
+}
+
+ul {
+    padding-left: 1.5rem;
+}
+
+ul li {
+    margin-bottom: 0.5rem;
+}
+
+a {
+    color: #008080;
+    text-decoration: underline;
+}
+
+
+footer {
+    padding-top: 20px;
+    font-size: 14px;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1 class="text-4xl font-bold">About Tracklio</h1>
+    </header>
+
+    <div class="container mx-auto py-8 px-4">
+        <section>
+            <h2 class="text-2xl font-semibold">Our Mission</h2>
+            <p>At Tracklio, our mission is to simplify expense tracking for everyone. We believe managing your finances should be effortless, efficient, and accessible. Our goal is to provide you with a hassle-free tool to track, manage, and gain insights into your spending habits.</p>
+        </section>
+        
+        <section>
+            <h2 class="text-2xl font-semibold">What We Do</h2>
+            <p>Tracklio is a personal expense tracker that lets you add, delete, and manage your expenses with ease. You can view monthly reports for any year and visualize your spending trends month-wise, helping you understand and optimize your financial habits.</p>
+        </section>
+        
+        <section>
+            <h2 class="text-2xl font-semibold">Why Choose Tracklio?</h2>
+            <ul class="list-disc pl-6">
+                <li><strong>Simple & Intuitive:</strong> A clean, user-friendly interface designed for effortless expense tracking.</li>
+                <li><strong>Secure & Private:</strong> Your data is securely stored, ensuring your financial information remains private.</li>
+                <li><strong>Personalized Reports:</strong> Visualize your expenses month-wise and get detailed insights for any year.</li>
+                <li><strong>Real-Time Tracking:</strong> Add and manage expenses on the go, anytime, anywhere.</li>
+                <li><strong>Completely Free:</strong> Tracklio is 100% free with no hidden charges—just pure expense management.</li>
+            </ul>
+        </section>
+        
+
+
+        <section>
+            <h2 class="text-2xl font-semibold">Contact Us</h2>
+            <p>If you have any questions, feedback, or suggestions,Click <a href="{{ url_for('contact') }}" >here</a>.</p>
+        </section>
+    </div>
+
+</body>
+</html>

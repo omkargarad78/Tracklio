@@ -1,0 +1,347 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100vh;
+}
+
+header {
+  width: 100%;
+  background: linear-gradient(to right, #333, #555);
+  color: #fff;
+  padding: 15px 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+
+nav ul {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+}
+
+nav ul li {
+  margin: 0 15px;
+}
+
+nav ul li a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.3s ease;
+}
+
+nav ul li a:hover {
+  color: #d2d2d2;
+}
+
+.container {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 90%;
+  max-width: 1500px;
+  margin-top: 20px;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #008080;
+}
+
+.content-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 90%;
+  max-width: 1200px;
+  gap: 40px;
+}
+
+.form-container {
+  flex: 1;
+  max-width: 650px;
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Added top shadow and depth */
+  margin: auto;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-container:hover {
+  transform: translateY(-5px);
+}
+
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+label {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 5px;
+}
+
+input {
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+  outline: none;
+}
+
+input[type="number"], input[type="text"] {
+  padding-left: 12px;
+}
+
+input[type="date"] {
+  padding-left: 10px;
+}
+
+button.add_expense {
+  padding: 6px;
+  background-color: #008080;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+button.delete {
+  padding: 6px;
+  background-color: #14B8A6;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+button.add_expense:hover {
+  background-color: #047070;
+  transform: translateY(-2px);
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+.expenses-container {
+  flex: 2;
+  background-color: #fff;
+  margin-top: 80px;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 2px 4px 40px rgba(0, 0, 0, 0.1);
+  max-height: none; /* Removed scrolling effect */
+}
+
+.table-container {
+  max-height: none; /* Removed the scrollable effect */
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+th, td {
+  padding: 10px;
+  text-align: center; /* Center align the table headers */
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  background-color: #f8f9fa;
+}
+
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+#totalAmount {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+/* Styling for the alert box */
+.alert {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 15px;
+  border-radius: 6px;
+  font-size: 16px;
+  color: #fff;
+  z-index: 999;
+  width: 300px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  animation: fadeIn 0.5s forwards, fadeOut 0.5s forwards 1.8s;
+}
+
+/* Success alert (Green) */
+.alert.success {
+  background-color: #28a745;
+}
+
+/* Error alert (Red) */
+.alert.error {
+  background-color: #dc3545;
+}
+
+/* Fade-in and fade-out animation */
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* css for reports file */
+
+.reports {
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.reports h2 {
+  font-size: 1.75rem;
+  color: #343a40;
+  margin-bottom: 25px;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* Flexbox layout for form */
+.reports form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  justify-items: center;
+}
+
+.reports label {
+  font-size: 1rem;
+  color: #495057;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.reports select,
+.reports button {
+  padding: 12px;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background-color: #f8f9fa;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+/* Focus effect for select and button */
+.reports select:focus,
+.reports button:focus {
+  border-color: #008080;
+  outline: none;
+}
+
+/* Hover effects for the button */
+.reports button {
+  padding: 6px;
+    background-color: #008080;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.reports button:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
+
+/* Responsive layout for small screens */
+@media (max-width: 600px) {
+  .reports h2 {
+      font-size: 1.5rem;
+  }
+
+  .reports form {
+      gap: 15px; /* Reduced gap for smaller screens */
+  }
+}
+
+@media (max-width: 768px) {
+  .content-wrapper {
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .form-container, .expenses-container {
+    width: 100%;
+    max-width: 600px;
+  }
+}
+
+
+
+
+
+
+
+

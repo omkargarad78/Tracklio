@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Expense Tracker{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+
+</head>
+<body>
+  <header>
+    <nav>
+      <ul>
+        <li><a href="/index">Home</a></li>
+        <li><a href="/reports">Reports</a></li>
+        <li><a href="/visualize">Visualize</a></li>
+        <li><a href="javascript:void(0);" onclick="logoutUser()" class="text-blue-600 font-medium hover:text-blue-800 hover:underline">Logout</a></li>
+
+      </ul>
+    </nav>
+  </header>
+
+  
+
+  <div class="container">
+    {% block content %}
+    <!-- Content will be overridden by child templates -->
+    {% endblock %}
+  </div>
+
+  <script src="{{ url_for('static', filename='index.js') }}"></script>
+</body>
+
+</html>

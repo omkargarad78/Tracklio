@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - Predicto</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <style>
+        body {
+    font-family: Arial, sans-serif;
+    background-color: #ffffff; /* White background */
+    color: #333; /* Dark text */
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: #008080; /* Teal color */
+    color: white;
+    text-align: center;
+    padding: 5px 0;
+}
+
+section {
+    margin: 20px;
+    line-height: 1.6;
+}
+
+h2 {
+    color: #008080; /* Teal color */
+}
+
+.text-sm {
+    font-size: 14px;
+}
+
+.space-y-2 {
+    margin-bottom: 1rem;
+}
+
+ul {
+    padding-left: 1.5rem;
+}
+
+ul li {
+    margin-bottom: 0.5rem;
+}
+
+a {
+    color: #008080;
+    text-decoration: underline;
+}
+
+footer {
+    padding-top: 20px;
+    font-size: 14px;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1 class="text-4xl font-bold"> Privacy Policy</h1>
+        <p class="text-lg">Effective Date: 1st of January 2025</p>
+    </header>
+
+    <div class="container mx-auto py-8 px-4">
+        <section>
+            <p><strong>Last Updated: 10th of February 2025</strong></p>
+            <p>Welcome to Tracklio! Your privacy is important to us. This Privacy Policy explains how we collect, use, and protect your personal data when you access or use our platform. By using Tracklio, you agree to the collection and use of information as described in this policy.</p>
+        </section>
+    
+        <section>
+            <h2 class="text-2xl font-semibold">1. Information We Collect</h2>
+            <p>We collect the following types of information:</p>
+            <ul class="list-disc pl-6">
+                <li><strong>Personal Information:</strong> When you register on Tracklio, we collect details like your username, hashed password and login credentials to manage your account securely.</li>
+                <li><strong>Expense Data:</strong> Information you add related to your expenses, such as date, amount, and descriptions.</li>
+                <li><strong>Usage Data:</strong> Data on how you interact with Tracklio, including device type, browser information, IP address, and usage patterns to improve our services.</li>
+            </ul>
+        </section>
+    
+        <section>
+            <h2 class="text-2xl font-semibold">2. How We Use Your Information</h2>
+            <p>Your information is used for the following purposes:</p>
+            <ul class="list-disc pl-6">
+                <li>To create and manage your Tracklio account.</li>
+                <li>To securely store and manage your expense data.</li>
+                <li>To generate personalized reports and visualizations for better financial insights.</li>
+                <li>To improve the performance, features, and security of our platform.</li>
+            </ul>
+        </section>
+    
+        <section>
+            <h2 class="text-2xl font-semibold">3. Data Security</h2>
+            <p>We take strong technical and organizational measures to protect your data. While no system can guarantee absolute security, we continuously work to safeguard your personal information through encryption, secure servers, and regular security audits.</p>
+        </section>
+    
+        <section>
+            <h2 class="text-2xl font-semibold">4. Sharing of Information</h2>
+            <p>We do not sell or rent your personal information. We may share your data only in the following cases:</p>
+            <ul class="list-disc pl-6">
+                <li>With trusted service providers who help us operate and maintain Tracklio (under strict confidentiality agreements).</li>
+                <li>When required by law, legal proceedings, or government requests.</li>
+                <li>To protect the rights, safety, and security of Tracklio, its users, or the public.</li>
+            </ul>
+        </section>
+    
+        <section>
+            <h2 class="text-2xl font-semibold">5. Your Rights</h2>
+            <p>As a Tracklio user, you have the right to:</p>
+            <ul class="list-disc pl-6">
+                <li>Request deletion of your account and personal data, subject to applicable laws.</li>
+                <li>Control how your data is processed, including opting out of non-essential communications.</li>
+            </ul>
+        </section>
+    
+        <section>
+            <h2 class="text-2xl font-semibold">6. Cookies</h2>
+            <p>Tracklio uses cookies to enhance your experience. Cookies help us remember your preferences, improve functionality, and analyze usage. You can manage or disable cookies through your browser settings, but some features may be limited as a result.</p>
+        </section>
+    
+        <section>
+            <h2 class="text-2xl font-semibold">7. Changes to This Privacy Policy</h2>
+            <p>We may update this Privacy Policy from time to time. Significant changes will be communicated via email or platform notifications. Continued use of Tracklio after updates means you accept the revised policy.</p>
+        </section>
+    
+        <section>
+            <h2 class="text-2xl font-semibold">8. Contact Us</h2>
+            <p>If you have any questions or concerns about this Privacy Policy, please <a href="{{ url_for('contact') }}">click here</a> to reach out to us.</p>
+        </section>
+    </div>
+    
+
+</body>
+</html>

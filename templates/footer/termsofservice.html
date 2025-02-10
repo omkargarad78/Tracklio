@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms of Service - Expense Tracker</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <style>
+        body {
+    font-family: Arial, sans-serif;
+    background-color: #ffffff; /* White background */
+    color: #333; /* Dark text */
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: #008080; /* Teal color */
+    color: white;
+    text-align: center;
+    padding: 5px 0;
+}
+
+section {
+    margin: 20px;
+    line-height: 1.6;
+}
+
+h2 {
+    color: #008080; /* Teal color */
+}
+
+.text-sm {
+    font-size: 14px;
+}
+
+.space-y-2 {
+    margin-bottom: 1rem;
+}
+
+ul {
+    padding-left: 1.5rem;
+}
+
+ul li {
+    margin-bottom: 0.5rem;
+}
+
+a {
+    color: #008080;
+    text-decoration: underline;
+}
+
+footer {
+    padding-top: 20px;
+    font-size: 14px;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1 class="text-4xl font-bold">Terms of Service</h1>
+        <p class="text-lg">Effective Date: 1st February 2025</p>
+    </header>
+
+    <div class="container mx-auto py-8 px-4">
+        <section>
+            <h2 class="text-2xl font-semibold">1. Acceptance of Terms</h2>
+            <p>
+                By accessing and using Tracklio (referred to as "Service" or "Platform"), you agree to comply with and be bound by these Terms of Service. If you do not agree to these terms, please do not use the Service.
+            </p>
+        </section>
+    
+        <section>
+            <h2 class="text-2xl font-semibold">2. User Eligibility</h2>
+            <p>
+                You must be at least 18 years old to use Tracklio. Additionally, users must have a valid email address to register and access their personal account. Each user is allowed only one account.
+            </p>
+        </section>
+    
+        <section>
+            <h2 class="text-2xl font-semibold">3. Registration and Account Security</h2>
+            <p>
+                Users must provide accurate and complete information when registering. You are responsible for maintaining the security and confidentiality of your account information, including your username and password. Please notify us immediately of any unauthorized access or security breaches.
+            </p>
+        </section>
+    
+        <section>
+            <h2 class="text-2xl font-semibold">4. User Responsibilities</h2>
+            <p>
+                As a Tracklio user, you agree not to:
+            </p>
+            <ul class="list-disc pl-6">
+                <li>Provide false, misleading, or incomplete information.</li>
+                <li>Engage in any fraudulent activity or attempt to access another user's account.</li>
+                <li>Use the Platform for illegal or unethical purposes.</li>
+            </ul>
+        </section>
+    
+        <section>
+            <h2 class="text-2xl font-semibold">5. Expense Data Privacy</h2>
+            <p>
+                Tracklio collects and stores personal expense data solely to help you track and manage your finances. We take your privacy seriously and will not share your personal information with third parties unless required by law or as outlined in our Privacy Policy.
+            </p>
+        </section>
+    
+        <section>
+            <h2 class="text-2xl font-semibold">6. Payment and Subscription</h2>
+            <p>
+                Tracklio may offer additional paid features or subscription plans. By opting for these services, you agree to pay the applicable fees. All transactions are processed securely, and you will be notified of any charges before completing a payment.
+            </p>
+        </section>
+    
+        <section>
+            <h2 class="text-2xl font-semibold">7. Limitation of Liability</h2>
+            <p>
+                Tracklio is provided "as-is" without any warranties, express or implied. We do not guarantee that the Service will be uninterrupted or error-free. Tracklio is not liable for any direct, indirect, or consequential losses resulting from your use of the Platform.
+            </p>
+        </section>
+    
+        <section>
+            <h2 class="text-2xl font-semibold">8. Termination of Account</h2>
+            <p>
+                We reserve the right to suspend or terminate your account if you violate any of these Terms of Service. Upon termination, access to your account and associated data will be revoked.
+            </p>
+        </section>
+    
+        <section>
+            <h2 class="text-2xl font-semibold">9. Changes to Terms of Service</h2>
+            <p>
+                Tracklio reserves the right to modify these Terms of Service at any time. Updates will be posted on this page, and the "Effective Date" will be updated accordingly. Continued use of the Platform after changes indicates your acceptance of the revised terms.
+            </p>
+        </section>
+    
+        <section>
+            <h2 class="text-2xl font-semibold">10. Governing Law</h2>
+            <p>
+                These Terms of Service are governed by the laws of India. Any disputes arising from these terms or the use of Tracklio will be subject to the jurisdiction of the courts of Maharashtra, India.
+            </p>
+        </section>
+    
+        <footer class="text-center mt-8">
+            <p>For any questions or concerns regarding these Terms of Service, please Click <a href="{{ url_for('contact') }}">here</a>.</p>
+        </footer>
+    </div>
+    
+
+</body>
+</html>
