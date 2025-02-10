@@ -4,8 +4,6 @@ from datetime import datetime
 import bcrypt
 import os
 from dotenv import load_dotenv  # Import dotenv
-
-#mail
 import smtplib
 from email.mime.text import MIMEText
 
