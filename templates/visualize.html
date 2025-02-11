@@ -6,36 +6,33 @@
 <div class="container">
   <!-- Heading -->
   <h1 class="text-center">Expense Visualization for <span id="displayYear">{{ year }}</span></h1>
-  <p class="text-center text-muted">Analyze your monthly expenses using this interactive chart.</p>
+  <p class="text-center text-muted">Analyze your monthly expenses using this interactive chart</p>
 
   <!-- Year and Search Query Form -->
-  <div class="form-container">
-    <form id="yearSelectionForm" class="year-selection-form">
-      <div class="form-group">
-        <!-- Year Dropdown -->
-        <label for="year" class="form-label">Select Year:</label>
-        <select name="year" id="year" class="form-select">
-          {% for y in range(2022, 2026) %}
-            <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
-          {% endfor %}
-        </select>
-      </div>
+<div class="form-container">
+  <form id="yearSelectionForm" class="year-selection-form">
+    <div class="form-group">
+      <!-- Year Dropdown -->
+      <label for="year" class="form-label">Select Year:</label>
+      <select name="year" id="year" class="form-select">
+        {% for y in range(2022, 2026) %}
+          <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <!-- Search Query Input -->
+      <label for="searchQuery" class="form-label">Search Item (optional):</label>
+      <input type="text" id="searchQuery" class="form-control" placeholder="Search for an item (e.g., Milk)" />
+    </div>
+    <!-- View Data Button -->
+    <button type="submit" class="add_expense">Visualize</button>
+  </form>
+</div>
 
-      <div class="form-group">
-        <!-- Search Query Input -->
-        <label for="searchQuery" class="form-label">Search Item (optional):</label>
-        <input type="text" id="searchQuery" class="form-control" placeholder="Search for an item (e.g., Milk)" />
-      </div>
-
-      <!-- View Data Button -->
-      <button type="submit" class="add_expense">View Data</button>
-    </form>
-  </div>
-
-  <!-- Chart Container -->
-  <div class="chart-container">
-    <canvas id="expenseChart" width="400" height="200"></canvas>
-  </div>
+<!-- Chart Container -->
+<div class="chart-container">
+  <canvas id="expenseChart" width="400" height="200"></canvas>
 </div>
 
 <!-- Include Chart.js -->
@@ -104,70 +101,133 @@
 
   // Initialize with the current year
   fetchData({{ year }});
+
+
+  const menuToggle = document.getElementById('menu-toggle');
+  const mobileMenu = document.getElementById('mobile-menu');
+
+  menuToggle.addEventListener('click', () => {
+    mobileMenu.style.display = mobileMenu.style.display === 'block' ? 'none' : 'block';
+  });
+
+
 </script>
 
 <style>
+  /* General Styles */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 1500px; /* Maximum width for larger screens */
+  width: 95%; /* Use percentage-based width for responsiveness */
+  margin: 0 auto; /* Center the container horizontally */
+  padding: 20px; /* Default padding for larger screens */
+  background-color: #ffffff;
+  border-radius: 8px;
+  margin-top: 40px; /* Default top margin for larger screens */
+  box-sizing: border-box; /* Ensure padding and borders are included in the width */
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-muted {
+  color: #6c757d;
+}
+
+.form-container {
+  margin-bottom: 30px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%; /* Ensure full width for responsiveness */
+}
+
+.form-select,
+#searchQuery {
+  width: 100%; /* Use full width for dropdowns and inputs */
+  max-width: 630px; /* Limit maximum width for larger screens */
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px; /* Default font size for inputs */
+  box-sizing: border-box; /* Include padding and border in width */
+}
+
+.add_expense {
+  padding: 10px 15px;
+  background-color: #D32F2F; /* Red background */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+  width: auto; /* Default width for buttons */
+}
+
+.add_expense:hover {
+  background-color: #C2185B; /* Pinkish-red on hover */
+}
+
+.chart-container {
+  width: 100%; /* Use full width for charts */
+  max-width: 800px; /* Limit maximum width for larger screens */
+  height: 400px;
+  margin: 20px auto 0; /* Center the chart container */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
   .container {
-    max-width: 1500px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    margin-top: 20px;
+    padding: 15px; /* Reduce padding for smaller screens */
+    margin-top: 20px; /* Reduce top margin for smaller screens */
   }
 
-  .text-center {
-    text-align: center;
-  }
-
-  .text-muted {
-    color: #6c757d;
-  }
-
-  .form-container {
-    margin-bottom: 30px;
-  }
-
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .form-select {
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    margin-bottom: 10px;
+  .form-select,
+  #searchQuery {
+    font-size: 14px; /* Reduce font size for smaller screens */
+    padding: 8px; /* Reduce padding for smaller screens */
   }
 
   .add_expense {
-    padding: 10px 15px;
-    background-color: #D32F2F;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-
-  .add_expense:hover {
-    background-color: #C2185B;
+    padding: 8px 12px; /* Reduce padding for smaller screens */
+    font-size: 14px; /* Reduce font size for smaller screens */
   }
 
   .chart-container {
-    width: 100%;
-    height: 400px;
-    margin-top: 20px;
+    height: 300px; /* Reduce height for smaller screens */
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 10px; /* Further reduce padding for very small screens */
+    margin-top: 15px; /* Further reduce top margin for very small screens */
   }
 
+  .form-select,
   #searchQuery {
-    width: 630px;
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
+    max-width: 300px; /* Further limit width for very small screens */
   }
+
+  .add_expense {
+    width: 100%; /* Make the button full-width for very small screens */
+  }
+
+  .chart-container {
+    height: 300px; /* Further reduce height for very small screens */
+  }
+}
 </style>
 
 {% endblock %}

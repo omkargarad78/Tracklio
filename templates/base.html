@@ -10,15 +10,39 @@
 </head>
 <body>
   <header>
-    <nav>
+    <div class="header-container">
+      <!-- Logo and Brand Name -->
+      {% set logo_path = url_for('static', filename='images/logo.png') %}
+      <div class="brand">
+        <img src="{{ logo_path }}" alt="Tracklio Logo" class="logo">
+        <span class="brand-name">Tracklio</span>
+      </div>
+  
+      <!-- Navigation Links -->
+      <nav class="nav-links">
+        <ul>
+          <li><a href="/index">Home</a></li>
+          <li><a href="/reports">Reports</a></li>
+          <li><a href="/visualize">Visualize</a></li>
+          <li><a href="javascript:void(0);" onclick="logoutUser()">Logout</a></li>
+        </ul>
+      </nav>
+  
+      <!-- Hamburger Menu for Mobile -->
+      <button id="menu-toggle" class="hamburger">
+        ☰
+      </button>
+    </div>
+  
+    <!-- Mobile Navigation Links -->
+    <div id="mobile-menu" class="mobile-nav">
       <ul>
         <li><a href="/index">Home</a></li>
         <li><a href="/reports">Reports</a></li>
         <li><a href="/visualize">Visualize</a></li>
-        <li><a href="javascript:void(0);" onclick="logoutUser()" class="text-blue-600 font-medium hover:text-blue-800 hover:underline">Logout</a></li>
-
+        <li><a href="javascript:void(0);" onclick="logoutUser()">Logout</a></li>
       </ul>
-    </nav>
+    </div>
   </header>
 
   

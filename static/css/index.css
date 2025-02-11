@@ -1,5 +1,6 @@
+/* General Styles */
 body {
-  font-family: Arial, sans-serif;
+  font-family: Arial, sans-serif; /* Replace with the exact font if specified */
   background-color: #f4f4f4;
   margin: 0;
   padding: 0;
@@ -9,37 +10,138 @@ body {
   height: 100vh;
 }
 
+/* Header Styling */
 header {
   width: 100%;
-  background: linear-gradient(to right, #333, #555);
-  color: #fff;
-  padding: 15px 0;
+  background: #ffffff; /* White background */
+  color: #333333; /* Dark text */
+  padding: 10px 0; /* Adjust padding for spacing */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  top: 0;
+  z-index: 999;
 }
 
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
 
+.brand {
+  display: flex;
+  align-items: center;
+}
 
-nav ul {
+.logo {
+  width: 50px; /* Match the size of the logo in the PDF */
+  height: 50px;
+  margin-right: 10px; /* Space between logo and brand name */
+}
+
+.brand-name {
+  font-size: 1.8rem; /* Match the font size in the PDF */
+  font-weight: bold;
+  color: #008080; /* Teal color for the brand name */
+}
+
+.nav-links ul {
   list-style: none;
   display: flex;
-  justify-content: center;
   margin: 0;
   padding: 0;
 }
 
-nav ul li {
+.nav-links li {
   margin: 0 15px;
 }
 
-nav ul li a {
-  color: #fff;
+.nav-links a {
+  color: #333333; /* Dark text for links */
   text-decoration: none;
-  font-weight: bold;
+  font-weight: 500;
   transition: color 0.3s ease;
 }
 
-nav ul li a:hover {
-  color: #d2d2d2;
+.nav-links a:hover {
+  color: #008080; /* Teal hover effect */
+}
+
+.btn-get-started {
+  background-color: #008080; /* Teal background */
+  color: white; /* White text */
+  padding: 10px 20px;
+  border-radius: 25px; /* Rounded corners */
+  text-decoration: none;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.btn-get-started:hover {
+  background-color: #0056b3; /* Darker teal on hover */
+}
+
+/* Hamburger Menu */
+.hamburger {
+  display: none;
+  font-size: 1.5rem;
+  background: none;
+  border: none;
+  color: #333333;
+  cursor: pointer;
+}
+
+/* Mobile Navigation */
+.mobile-nav {
+  display: none;
+  background: #ffffff;
+  color: #333333;
+  text-align: center;
+  padding: 10px 0;
+}
+
+.mobile-nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.mobile-nav li {
+  margin: 10px 0;
+}
+
+.mobile-nav a {
+  color: #333333;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.mobile-nav a:hover {
+  color: #008080;
+}
+
+.mobile-nav .btn-get-started {
+  display: inline-block;
+  margin-top: 10px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .nav-links {
+    display: none; /* Hide desktop navigation on smaller screens */
+  }
+
+  .hamburger {
+    display: block; /* Show hamburger menu */
+  }
+
+  .mobile-nav {
+    display: block; /* Show mobile navigation */
+  }
 }
 
 .container {
@@ -49,7 +151,7 @@ nav ul li a:hover {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   width: 90%;
   max-width: 1500px;
-  margin-top: 20px;
+  margin-top: 90px;
 }
 
 h1 {
