@@ -242,46 +242,48 @@
     <!-- Footer -->
     <footer class="bg-gray-900 text-gray-300 py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid md:grid-cols-4 gap-8">
+            <div class="grid md:grid-cols-4 gap-8 items-start"> <!-- Added items-start for vertical alignment -->
                 <div>
                     <h3 class="text-white text-lg font-semibold mb-4">Tracklio</h3>
                     <p class="text-sm">Track, analyze, and take control of your financial journey with Tracklio.</p>
                 </div>
-                <!-- <div>
-                    <h4 class="text-white text-sm font-semibold mb-4">Product</h4>
-                    <ul class="space-y-2 text-sm">
-                        <li><a href="#" class="hover:text-white">Features</a></li>
-                        <li><a href="#" class="hover:text-white">Pricing</a></li>
-                        <li><a href="#" class="hover:text-white">FAQ</a></li>
-                    </ul>
-                </div> -->
                 <div>
                     <h4 class="text-white text-sm font-semibold mb-4">Company</h4>
                     <ul class="space-y-2 text-sm">
                         <li><a href="{{ url_for('about') }}" class="hover:text-white">About</a></li>
                     </ul>
                 </div>
-
+    
                 <div>
                     <h4 class="text-white text-sm font-semibold mb-4">Contact Us</h4>
                     <ul class="space-y-2 text-sm">
                         <li><a href="{{ url_for('contact') }}" class="hover:text-white">Contact</a></li>
                     </ul>
                 </div>
-            
-                <div>
-                    <h4 class="text-white text-sm font-semibold mb-4">Legal</h4>
-                    <ul class="space-y-2 text-sm">
-                        <li><a href="{{ url_for('privacy_policy') }}" class="hover:text-white">Privacy Policy</a></li>
-                        <li><a href="{{ url_for('termsofservice') }}" class="hover:text-white">Terms of Service</a></li>
-                    </ul>
+    
+                <div class="flex items-center justify-between"> 
+                    <div>
+                        <h4 class="text-white text-sm font-semibold mb-4">Legal</h4>
+                        <ul class="space-y-2 text-sm">
+                            <li><a href="{{ url_for('privacy_policy') }}" class="hover:text-white">Privacy Policy</a></li>
+                            <li><a href="{{ url_for('termsofservice') }}" class="hover:text-white">Terms of Service</a></li>
+                        </ul>
+                    </div>
+                    <!-- LinkedIn Icon -->
+                    <a href="https://www.linkedin.com/in/omkar-garad-9210b522b/" target="_blank" class="ml-4 text-gray-300 hover:text-white transition-colors duration-300 self-start"> 
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="w-6 h-6" viewBox="0 0 24 24">
+                            <path d="M4.98 3.5C4.98 4.88 3.88 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1 4.98 2.12 4.98 3.5zM.5 8h4v14h-4V8zm7 0h3.6v2h.05c.5-.9 1.75-1.85 3.6-1.85 3.85 0 4.55 2.5 4.55 5.75V22h-4v-7.5c0-1.8 0-4.1-2.5-4.1s-2.9 1.95-2.9 4V22h-4V8z"/>
+                        </svg>
+                    </a>
                 </div>
             </div>
-            <div class="border-t border-gray-800 mt-12 pt-8 text-sm text-center">
+            <div class="border-t border-gray-800 mt-12 pt-4 text-sm text-center">
                 <p>&copy; 2025 Tracklio. All rights reserved.</p>
+                <p>Crafted with care by Omkar Garad</p>
             </div>
         </div>
     </footer>
+    
     <script src="{{ url_for('static', filename='landing.js') }}"></script>
 </body>
 </html>
