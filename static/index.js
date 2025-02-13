@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-// Handle form submission
 document.getElementById('expenseForm').addEventListener('submit', function (e) {
   e.preventDefault(); // Prevent default form submission
 
@@ -15,15 +14,24 @@ document.getElementById('expenseForm').addEventListener('submit', function (e) {
   const type = document.getElementById('type').value;
   const amountField = document.getElementById('amount'); // Get the amount input field
   const amount = parseFloat(amountField.value); // Convert to number
+  const submitButton = document.querySelector('.add_expense'); // Get the submit button
 
   // Validate that the amount is greater than zero
   if (amount <= 0) {
     showAlert('Amount must be greater than zero.', 'error');
-
-    // Clear only the amount field
-    amountField.value = '';
+    amountField.value = ''; // Clear only the amount field
     return; // Stop further execution
   }
+
+  // Disable button and change color
+  submitButton.disabled = true;
+  submitButton.style.backgroundColor = 'teal';
+
+  // Enable button after 3 seconds
+  setTimeout(() => {
+    submitButton.disabled = false;
+    submitButton.style.backgroundColor = ''; // Reset to default color
+  }, 3000);
 
   fetch('/add', {
     method: 'POST',
@@ -36,8 +44,7 @@ document.getElementById('expenseForm').addEventListener('submit', function (e) {
     .then(data => {
       if (data.success) {
         showAlert('Expense added successfully!', 'success');
-
-        window.location.reload();
+        window.location.reload(); // Reload to update UI
       } else {
         showAlert('Failed to add expense.', 'error');
       }
