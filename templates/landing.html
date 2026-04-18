@@ -1,318 +1,1105 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tracklio - Personal Expense Tracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
-    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="{{ url_for('static', filename='images/favicon.ico') }}"
+    />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Plus Jakarta Sans", "system-ui", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        .gradient-bg {
-            background: linear-gradient(135deg, #00BFA6 0%, #0B8B8C 100%);
-        }
-        .feature-card:hover {
-            transform: translateY(-5px);
-            transition: transform 0.3s ease;
-        }
-        .hero-pattern {
-            background-image: radial-gradient(circle at 2px 2px, rgba(255, 255, 255, 0.1) 1px, transparent 0);
-            background-size: 24px 24px;
-        }
+      :root {
+        --primary: #0f172a;
+        --accent: #f59e0b;
+        --accent-hover: #d97706;
+        --accent-muted: rgba(245, 158, 11, 0.14);
+        --bg: #f8fafc;
+        --text: #111827;
+        --secondary: #64748b;
+        --card: #ffffff;
+        --line: #e2e8f0;
+        --primary-soft: rgba(15, 23, 42, 0.06);
+        --shadow-card:
+          0 4px 6px -1px rgba(15, 23, 42, 0.06),
+          0 12px 24px -4px rgba(15, 23, 42, 0.08);
+        --shadow-float: 0 24px 48px -12px rgba(15, 23, 42, 0.12);
+      }
 
-        
+      html {
+        scroll-behavior: smooth;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+
+      body {
+        font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+        background-color: var(--bg);
+        color: var(--text);
+      }
+
+      .skip-link {
+        position: absolute;
+        left: 1rem;
+        top: -100%;
+        z-index: 100;
+        padding: 0.75rem 1.25rem;
+        background: var(--accent);
+        color: var(--primary);
+        font-weight: 700;
+        border-radius: 0.75rem;
+        transition: top 0.2s ease;
+      }
+
+      .skip-link:focus {
+        top: 1rem;
+        outline: 3px solid var(--primary);
+        outline-offset: 2px;
+      }
+
+      .hero-canvas {
+        background-color: var(--bg);
+        background-image:
+          radial-gradient(
+            at 0% 0%,
+            rgba(245, 158, 11, 0.08) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            at 100% 100%,
+            rgba(15, 23, 42, 0.06) 0%,
+            transparent 45%
+          );
+      }
+
+      .dash-card {
+        background: var(--card);
+        border-radius: 1.25rem;
+        box-shadow: var(--shadow-card);
+        border: 1px solid var(--line);
+      }
+
+      .dash-card--float {
+        box-shadow: var(--shadow-float);
+        border-radius: 1.5rem;
+      }
+
+      .focus-ring:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 3px;
+      }
+
+      .nav-link {
+        color: var(--secondary);
+        transition: color 0.2s ease;
+      }
+
+      .nav-link:hover {
+        color: var(--primary);
+      }
+
+      .feature-card {
+        transition:
+          transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+          box-shadow 0.3s ease;
+      }
+
+      .feature-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-float);
+      }
+
+      .feature-card:focus-within {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+
+      .reveal {
+        opacity: 0;
+        transform: translateY(16px);
+        transition:
+          opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+          transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      .reveal.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .pricing-popular {
+        box-shadow:
+          0 0 0 2px var(--accent),
+          var(--shadow-float);
+      }
     </style>
-</head>
-<body class="bg-gray-50">
-    <!-- Navigation -->
-{% set logo_path = url_for('static', filename='images/logo.png') %}
-<nav class="bg-white shadow-sm fixed w-full z-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16 items-center">
-            <!-- Logo and Brand Name -->
-            <div class="flex items-center space-x-3">
-                <!-- Uncomment the image tag if you want to use the logo -->
-                <!-- <img src="{{ logo_path }}" alt="Tracklio Logo" class="h-10 w-10"> -->
-                <span class="text-2xl font-bold text-teal-600">Tracklio</span>
-            </div>
+  </head>
+  <body class="antialiased text-[var(--text)] bg-[var(--bg)]">
+    <a href="#main-content" class="skip-link focus-ring"
+      >Skip to main content</a
+    >
 
-            <!-- Navigation Links for Desktop -->
-            <div class="hidden md:flex items-center space-x-8">
-                <a href="#features" class="text-gray-600 hover:text-gray-900">Features</a>
-                <a href="#pricing" class="text-gray-600 hover:text-gray-900">Pricing</a>
-                <a href="{{ url_for('login') }}" class="text-gray-600 hover:text-gray-900">Login</a>
-                <a href="{{ url_for('register') }}" class="bg-teal-600 text-white px-6 py-2 rounded-full hover:bg-teal-700 transition-colors">
-                    Get Started
-                </a>
-            </div>
-
-            <!-- Hamburger Menu for Mobile -->
-            <button id="menu-toggle" class="md:hidden text-teal-600 focus:outline-none">
-                ☰
-            </button>
-        </div>
-    </div>
-
-    <!-- Mobile Navigation Links -->
-    <div id="mobile-menu" class="hidden md:hidden bg-white shadow-md">
-        <div class="px-4 py-6 space-y-4">
-            <a href="#features" class="block text-gray-600 hover:text-gray-900">Features</a>
-            <a href="#pricing" class="block text-gray-600 hover:text-gray-900">Pricing</a>
-            <a href="{{ url_for('login') }}" class="block text-gray-600 hover:text-gray-900">Login</a>
-            <a href="{{ url_for('register') }}" class="block bg-teal-600 text-white px-6 py-2 rounded-full hover:bg-teal-700 transition-colors">
-                Get Started
-            </a>
-        </div>
-    </div>
-</nav>
-    
-    
-
-    <!-- Hero Section -->
-<div class="gradient-bg hero-pattern min-h-screen flex items-center pt-16 rounded-b-2xl">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-            <!-- Left Side: Text Content -->
-            <div class="text-left">
-                <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-[rgb(13_148_136_/var(--tw-bg-opacity,1))] mb-6 leading-tight">
-                    Track Expenses, Gain Control
-                </h1>
-                <p class="text-lg sm:text-xl text-gray-700 mb-8">
-                    Effortlessly manage your finances with Tracklio. Simple, intuitive, and designed for you.
-                </p>
-                <div class="flex flex-col sm:flex-row gap-4">
-                    <a href="{{ url_for('register') }}" class="bg-teal-100 text-teal-600 px-6 py-3 rounded-full font-semibold hover:bg-teal-200 transition-colors text-center">
-                        Start Free Trial
-                    </a>
-                    <div class="flex items-center justify-center sm:justify-start space-x-4">
-                        <div class="flex -space-x-2">
-                            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="User" class="w-8 h-8 rounded-full border-2 border-white">
-                            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="User" class="w-8 h-8 rounded-full border-2 border-white">
-                            <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="User" class="w-8 h-8 rounded-full border-2 border-white">
-                        </div>
-                        <span class="text-gray-700 text-sm">Join Now!</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right Side: Expense Table -->
-            <div class="relative">
-                <div class="bg-white/5 backdrop-blur-lg rounded-2xl p-6 relative z-10">
-                    <div class="bg-white rounded-xl shadow-lg p-6">
-                        <div class="flex justify-between items-center mb-6">
-                            <h3 class="text-lg sm:text-xl font-semibold">Your Expenses for February, 2025</h3>
-                            <span class="text-teal-600 font-bold text-lg sm:text-xl">₹8700</span>
-                        </div>
-                        <div class="space-y-4">
-                            <!-- Table Header -->
-                            <div class="bg-gray-50 rounded-lg p-4">
-                                <div class="grid grid-cols-4 gap-4 font-semibold text-gray-700">
-                                    <div>Date</div>
-                                    <div>Type</div>
-                                    <div>Amount</div>
-                                    <div>Actions</div>
-                                </div>
-                            </div>
-
-                            <!-- Expense Items -->
-                            <div class="space-y-3">
-                                <!-- Expense Item 1 -->
-                                <div class="flex justify-between items-center bg-gray-50 rounded-lg p-4">
-                                    <div class="w-1/4 text-sm sm:text-base">2025-02-10</div>
-                                    <div class="w-1/4 text-sm sm:text-base">Mortgage</div>
-                                    <div class="w-1/4 font-semibold text-sm sm:text-base">₹5500.00</div>
-                                    <button class="bg-teal-500 hover:bg-teal-600 text-white px-3 py-1 rounded-md transition duration-200 text-xs sm:text-sm">
-                                        Delete
-                                    </button>
-                                </div>
-
-                                <!-- Expense Item 2 -->
-                                <div class="flex justify-between items-center bg-gray-50 rounded-lg p-4">
-                                    <div class="w-1/4 text-sm sm:text-base">2025-02-10</div>
-                                    <div class="w-1/4 text-sm sm:text-base">Shopping</div>
-                                    <div class="w-1/4 font-semibold text-sm sm:text-base">₹3200.00</div>
-                                    <button class="bg-teal-500 hover:bg-teal-600 text-white px-3 py-1 rounded-md transition duration-200 text-xs sm:text-sm">
-                                        Delete
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-    <!-- Features Section -->
-    <div id="features" class="py-24 bg-white">
+    {% set logo_path = url_for('static', filename='images/logo.png') %}
+    <header>
+      <nav
+        class="fixed top-0 w-full z-50 border-b border-[var(--line)] bg-[var(--card)]/95 backdrop-blur-md"
+        aria-label="Primary"
+      >
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl font-bold text-gray-900 mb-4">Everything You Need to Manage Expenses</h2>
-                <p class="text-xl text-gray-600 max-w-2xl mx-auto">
-                    Powerful features to help you track, analyze, and optimize your spending habits.
-                </p>
+          <div class="flex justify-between h-16 items-center">
+            <div class="flex items-center gap-3">
+              <span
+                class="text-lg sm:text-xl font-extrabold tracking-tight text-[var(--primary)]"
+              >
+                Tracklio
+              </span>
             </div>
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="feature-card bg-white p-6 rounded-xl shadow-lg">
-                    <div class="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center mb-4">
-                        <svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Expense Tracking</h3>
-                    <p class="text-gray-600">Add and delete expenses effortlessly to keep your records up-to-date.</p>
-                </div>
-                <div class="feature-card bg-white p-6 rounded-xl shadow-lg">
-                    <div class="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center mb-4">
-                        <svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Monthly Reports</h3>
-                    <p class="text-gray-600">View detailed monthly expense reports for any specific year.</p>
-                </div>
-                <div class="feature-card bg-white p-6 rounded-xl shadow-lg">
-                    <div class="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center mb-4">
-                        <svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Insights & Reports</h3>
-                    <p class="text-gray-600">Get detailed analytics and reports to understand your spending patterns.</p>
-                </div>
+
+            <div class="hidden md:flex items-center gap-8">
+              <a
+                href="#features"
+                class="nav-link text-sm font-semibold focus-ring rounded-md py-1"
+                >Features</a
+              >
+              <a
+                href="#pricing"
+                class="nav-link text-sm font-semibold focus-ring rounded-md py-1"
+                >Pricing</a
+              >
+              <a
+                href="{{ url_for('login') }}"
+                class="nav-link text-sm font-semibold focus-ring rounded-md py-1"
+                >Login</a
+              >
+              <a
+                href="{{ url_for('register') }}"
+                class="inline-flex items-center justify-center rounded-full bg-[var(--primary)] text-white px-5 py-2.5 text-sm font-bold shadow-sm hover:bg-[#1e293b] transition-colors focus-ring"
+              >
+                Get Started
+              </a>
             </div>
+
+            <button
+              type="button"
+              id="menu-toggle"
+              class="md:hidden flex h-10 w-10 items-center justify-center rounded-xl text-[var(--primary)] hover:bg-[var(--primary-soft)] focus-ring"
+              aria-expanded="false"
+              aria-controls="mobile-menu"
+              aria-label="Open menu"
+            >
+              <svg
+                class="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
-    </div>
 
-    
-
-    <!-- Pricing Section -->
-    <section id="pricing" class="py-16 bg-gray-50">
-        <div class="container mx-auto px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="text-4xl font-bold text-gray-900">Simple, Transparent Pricing</h2>
-                <p class="text-gray-600 mt-2">Choose the plan that best fits your needs. No hidden fees.</p>
-            </div>
-            <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                
-                <!-- Starter Plan -->
-                <div class="bg-white p-6 rounded-lg shadow-md">
-                    <h3 class="text-2xl font-semibold text-gray-900">Starter</h3>
-                    <div class="mt-4 text-teal-600 text-3xl font-bold">Free<span class="text-sm text-gray-600"></span></div>
-                    <p class="text-gray-600 mt-2">Perfect for personal expense tracking</p>
-                    <ul class="mt-4 space-y-2 text-gray-700">
-                        <li>✔ Up to 100 yearly transactions</li>
-                        <li>✔ Basic expense categories</li>
-                        <li>✔ Monthly summary reports</li>
-                    </ul>
-                    <button class="mt-6 w-full bg-teal-100 text-teal-600 px-6 py-2 rounded-lg font-semibold hover:bg-teal-200 transition-colors">
-                        By Default
-                    </button>
-                </div>
-
-                <!-- Basic Plan -->
-                <div class="bg-white p-6 rounded-lg shadow-md border border-teal-500">
-                    <div class="bg-teal-500 text-white px-3 py-1 rounded-full text-xs inline-block mb-3">Most Popular</div>
-                    <h3 class="text-2xl font-semibold text-gray-900">Basic</h3>
-                    <div class="mt-4 text-teal-600 text-3xl font-bold">$10<span class="text-sm text-gray-600"> / year</span></div>
-                    <p class="text-gray-600 mt-2">For those who want more control</p>
-                    <ul class="mt-4 space-y-2 text-gray-700">
-                        <li>✔ Unlimited transactions</li>
-                        <li>✔ Custom categories</li>
-                        <li>✔ Detailed analytics</li>
-                        <li>✔ Export reports</li>
-                        <li>✔ Budget alerts</li>
-                    </ul>
-                    <button id="purchaseBtn" class="mt-6 w-full bg-teal-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-teal-700 transition-colors">
-                        Purchase (In Progress)
-                    </button>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-
-    
-
-    <!-- CTA Section -->
-    <!-- <div class="gradient-bg py-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl font-bold text-white mb-4">Ready to Take Control of Your Finances?</h2>
-            <p class="text-xl text-teal-50 mb-8">Join thousands of users who have transformed their financial habits with Tracklio.</p>
-            <a href="{{ url_for('register') }}" class="inline-block bg-white text-teal-600 px-8 py-3 rounded-full font-semibold hover:bg-teal-50 transition-colors">
-                Start Your Free Trial
+        <div
+          id="mobile-menu"
+          class="hidden md:hidden border-t border-[var(--line)] bg-[var(--card)] shadow-lg"
+          aria-label="Mobile navigation"
+          hidden
+        >
+          <div class="px-4 py-5 space-y-1">
+            <a
+              href="#features"
+              class="mobile-nav-link block rounded-xl px-3 py-3 text-[var(--secondary)] hover:bg-[var(--primary-soft)] hover:text-[var(--primary)] font-semibold focus-ring"
+              >Features</a
+            >
+            <a
+              href="#pricing"
+              class="mobile-nav-link block rounded-xl px-3 py-3 text-[var(--secondary)] hover:bg-[var(--primary-soft)] hover:text-[var(--primary)] font-semibold focus-ring"
+              >Pricing</a
+            >
+            <a
+              href="{{ url_for('login') }}"
+              class="mobile-nav-link block rounded-xl px-3 py-3 text-[var(--secondary)] hover:bg-[var(--primary-soft)] hover:text-[var(--primary)] font-semibold focus-ring"
+              >Login</a
+            >
+            <a
+              href="{{ url_for('register') }}"
+              class="mt-2 block text-center rounded-full bg-[var(--primary)] text-white px-6 py-3 font-bold hover:bg-[#1e293b] transition-colors focus-ring"
+            >
+              Get Started
             </a>
+          </div>
         </div>
-    </div> -->
+      </nav>
+    </header>
 
-    <!-- Footer -->
-<footer class="bg-gray-900 text-gray-300 py-8">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Grid Layout for Footer Sections -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 items-start">
-            <!-- Section 1: About Tracklio -->
-            <div>
-                <h3 class="text-white text-lg font-semibold mb-4">Tracklio</h3>
-                <p class="text-sm">Track, analyze, and take control of your financial journey with Tracklio.</p>
-            </div>
-
-            <!-- Section 2: Company -->
-            <div>
-                <h4 class="text-white text-sm font-semibold mb-4">Company</h4>
-                <ul class="space-y-2 text-sm">
-                    <li><a href="{{ url_for('about') }}" class="hover:text-white">About</a></li>
-                </ul>
-            </div>
-
-            <!-- Section 3: Contact Us -->
-            <div>
-                <h4 class="text-white text-sm font-semibold mb-4">Contact Us</h4>
-                <ul class="space-y-2 text-sm">
-                    <li><a href="{{ url_for('contact') }}" class="hover:text-white">Contact</a></li>
-                </ul>
-            </div>
-
-            <!-- Section 4: Legal and LinkedIn Icon -->
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between">
-                <div>
-                    <h4 class="text-white text-sm font-semibold mb-4">Legal</h4>
-                    <ul class="space-y-2 text-sm">
-                        <li><a href="{{ url_for('privacy_policy') }}" class="hover:text-white">Privacy Policy</a></li>
-                        <li><a href="{{ url_for('termsofservice') }}" class="hover:text-white">Terms of Service</a></li>
-                    </ul>
-                </div>
-                <!-- LinkedIn Icon -->
-                <a href="https://www.linkedin.com/in/omkar-garad-9210b522b/" target="_blank" class="ml-0 sm:ml-4 mt-4 sm:mt-0 text-gray-300 hover:text-white transition-colors duration-300">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="w-6 h-6" viewBox="0 0 24 24">
-                        <path d="M4.98 3.5C4.98 4.88 3.88 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1 4.98 2.12 4.98 3.5zM.5 8h4v14h-4V8zm7 0h3.6v2h.05c.5-.9 1.75-1.85 3.6-1.85 3.85 0 4.55 2.5 4.55 5.75V22h-4v-7.5c0-1.8 0-4.1-2.5-4.1s-2.9 1.95-2.9 4V22h-4V8z"/>
-                    </svg>
+    <main id="main-content">
+      <section
+        class="hero-canvas min-h-screen flex items-center pt-20 sm:pt-24 pb-16 sm:pb-20"
+      >
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+          <div
+            class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center"
+          >
+            <div class="lg:col-span-5 text-left">
+              <p
+                class="inline-flex items-center gap-2 rounded-full bg-[var(--card)] border border-[var(--line)] px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-[var(--secondary)] mb-6 shadow-sm"
+              >
+                <span
+                  class="h-2 w-2 rounded-full bg-[var(--accent)]"
+                  aria-hidden="true"
+                ></span>
+                Personal finance
+              </p>
+              <h1
+                class="text-4xl sm:text-5xl lg:text-[2.75rem] xl:text-[3.25rem] font-extrabold text-[var(--primary)] leading-[1.1] tracking-tight mb-6"
+              >
+                Your spending,<br />
+                <span class="text-[var(--accent)]">one clear</span> dashboard.
+              </h1>
+              <p
+                class="text-lg text-[var(--secondary)] max-w-md mb-9 leading-relaxed font-medium"
+              >
+                Track expenses and monthly totals with the calm, focused layout
+                you actually want to open.
+              </p>
+              <div
+                class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center"
+              >
+                <a
+                  href="{{ url_for('register') }}"
+                  class="inline-flex justify-center items-center gap-2 rounded-full bg-[var(--accent)] text-[var(--primary)] px-8 py-3.5 font-bold shadow-md hover:bg-[var(--accent-hover)] transition-colors focus-ring text-center"
+                >
+                  <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                  Start free trial
                 </a>
+                <a
+                  href="#features"
+                  class="inline-flex justify-center items-center rounded-full border-2 border-[var(--line)] bg-[var(--card)] text-[var(--primary)] px-8 py-3.5 font-bold hover:border-[var(--secondary)]/30 hover:bg-[var(--bg)] transition-colors focus-ring text-center"
+                >
+                  See what's inside
+                </a>
+              </div>
+              <div
+                class="mt-10 flex flex-wrap items-center gap-4 text-sm font-medium text-[var(--secondary)]"
+              >
+                <div class="flex -space-x-2" aria-hidden="true">
+                  <img
+                    src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                    alt=""
+                    class="w-9 h-9 rounded-full border-2 border-[var(--card)] object-cover"
+                  />
+                  <img
+                    src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                    alt=""
+                    class="w-9 h-9 rounded-full border-2 border-[var(--card)] object-cover"
+                  />
+                  <img
+                    src="https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                    alt=""
+                    class="w-9 h-9 rounded-full border-2 border-[var(--card)] object-cover"
+                  />
+                </div>
+                <span>Private by design—your data stays yours.</span>
+              </div>
             </div>
-        </div>
 
-        <!-- Copyright Section -->
-        <div class="border-t border-gray-800 mt-8 pt-4 text-sm text-center">
-            <p>&copy; 2025 Tracklio. All rights reserved.</p>
-            <p>Crafted with care by Omkar Garad</p>
-        </div>
-    </div>
-</footer>
-    
-    <!-- JavaScript for Toggle Menu -->
-<script>
-    const menuToggle = document.getElementById('menu-toggle');
-    const mobileMenu = document.getElementById('mobile-menu');
+            <div class="lg:col-span-7" aria-labelledby="preview-heading">
+              <p id="preview-heading" class="sr-only">
+                Sample dashboard preview
+              </p>
+              <div class="dash-card dash-card--float p-5 sm:p-6 lg:p-8">
+                <div
+                  class="flex flex-wrap items-center justify-between gap-4 mb-6"
+                >
+                  <div>
+                    <p
+                      class="text-xs font-bold text-[var(--secondary)] uppercase tracking-wider"
+                    >
+                      Overview
+                    </p>
+                    <h2
+                      class="text-xl sm:text-2xl font-extrabold text-[var(--primary)] mt-0.5"
+                    >
+                      February 2026
+                    </h2>
+                  </div>
+                  <span
+                    class="inline-flex items-center rounded-full bg-[var(--primary-soft)] text-[var(--primary)] text-xs font-bold px-3 py-1.5 border border-[var(--line)]"
+                    aria-hidden="true"
+                    >Preview UI</span
+                  >
+                </div>
 
-    menuToggle.addEventListener('click', () => {
-        mobileMenu.classList.toggle('hidden');
-    });
-</script>
-</body>
+                <div
+                  class="rounded-2xl border border-[var(--line)] bg-[var(--bg)] p-4 sm:p-5 mb-5"
+                >
+                  <p
+                    class="text-xs font-bold text-[var(--secondary)] uppercase tracking-wide mb-4"
+                  >
+                    Month at a glance
+                  </p>
+                  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div
+                      class="rounded-xl bg-[var(--card)] border border-[var(--line)] p-3 sm:p-4"
+                    >
+                      <p
+                        class="text-[11px] font-semibold text-[var(--secondary)]"
+                      >
+                        Spent
+                      </p>
+                      <p
+                        class="text-lg font-extrabold text-[var(--primary)] tabular-nums mt-1"
+                      >
+                        ₹8,700
+                      </p>
+                      <span
+                        class="inline-flex mt-2 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md"
+                        >−4.2%</span
+                      >
+                    </div>
+                    <div
+                      class="rounded-xl bg-[var(--card)] border border-[var(--line)] p-3 sm:p-4"
+                    >
+                      <p
+                        class="text-[11px] font-semibold text-[var(--secondary)]"
+                      >
+                        Budget left
+                      </p>
+                      <p
+                        class="text-lg font-extrabold text-[var(--primary)] tabular-nums mt-1"
+                      >
+                        ₹12.4k
+                      </p>
+                      <span
+                        class="inline-flex mt-2 text-[10px] font-bold text-[var(--accent-hover)] bg-[var(--accent-muted)] px-2 py-0.5 rounded-md"
+                        >On track</span
+                      >
+                    </div>
+                    <div
+                      class="rounded-xl bg-[var(--card)] border border-[var(--line)] p-3 sm:p-4"
+                    >
+                      <p
+                        class="text-[11px] font-semibold text-[var(--secondary)]"
+                      >
+                        Categories
+                      </p>
+                      <p
+                        class="text-lg font-extrabold text-[var(--primary)] tabular-nums mt-1"
+                      >
+                        14
+                      </p>
+                      <span
+                        class="inline-flex mt-2 text-[10px] font-bold text-[var(--secondary)] bg-slate-100 px-2 py-0.5 rounded-md"
+                        >Active</span
+                      >
+                    </div>
+                    <div
+                      class="rounded-xl bg-[var(--card)] border border-[var(--line)] p-3 sm:p-4"
+                    >
+                      <p
+                        class="text-[11px] font-semibold text-[var(--secondary)]"
+                      >
+                        Daily avg
+                      </p>
+                      <p
+                        class="text-lg font-extrabold text-[var(--primary)] tabular-nums mt-1"
+                      >
+                        ₹310
+                      </p>
+                      <span
+                        class="inline-flex mt-2 text-[10px] font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md"
+                        >+2.1%</span
+                      >
+                    </div>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div
+                    class="rounded-2xl border border-[var(--line)] bg-[var(--card)] p-4 sm:p-5"
+                  >
+                    <div class="flex justify-between items-start mb-4">
+                      <div>
+                        <p class="text-sm font-extrabold text-[var(--primary)]">
+                          Spending rhythm
+                        </p>
+                        <p
+                          class="text-xs text-[var(--secondary)] font-medium mt-0.5"
+                        >
+                          Last 6 weeks
+                        </p>
+                      </div>
+                    </div>
+                    <div
+                      class="flex items-end justify-between gap-1.5 h-28 px-1"
+                      role="img"
+                      aria-label="Bar chart sample: one week highlighted in gold"
+                    >
+                      <div
+                        class="flex-1 rounded-t-md bg-slate-100 h-[35%] min-h-[20px]"
+                        aria-hidden="true"
+                      ></div>
+                      <div
+                        class="flex-1 rounded-t-md bg-slate-100 h-[50%]"
+                        aria-hidden="true"
+                      ></div>
+                      <div
+                        class="flex-1 rounded-t-md bg-slate-100 h-[42%]"
+                        aria-hidden="true"
+                      ></div>
+                      <div
+                        class="flex-1 rounded-t-md bg-[var(--accent)] h-[78%] shadow-sm"
+                        aria-hidden="true"
+                      ></div>
+                      <div
+                        class="flex-1 rounded-t-md bg-slate-100 h-[55%]"
+                        aria-hidden="true"
+                      ></div>
+                      <div
+                        class="flex-1 rounded-t-md bg-slate-100 h-[48%]"
+                        aria-hidden="true"
+                      ></div>
+                    </div>
+                    <p
+                      class="text-[11px] text-[var(--secondary)] font-medium mt-3 text-center"
+                    >
+                      Gold bar = current period
+                    </p>
+                  </div>
+
+                  <div
+                    class="rounded-2xl border border-[var(--line)] bg-[var(--card)] p-4 sm:p-5"
+                  >
+                    <p
+                      class="text-sm font-extrabold text-[var(--primary)] mb-1"
+                    >
+                      Upcoming
+                    </p>
+                    <p class="text-xs text-[var(--secondary)] font-medium mb-4">
+                      Bills &amp; reminders
+                    </p>
+                    <ul class="space-y-2.5" role="list">
+                      <li
+                        class="rounded-xl border border-amber-100 bg-amber-50/80 px-3 py-2.5 flex justify-between items-center gap-2"
+                      >
+                        <span class="text-sm font-bold text-amber-950"
+                          >Grocery</span
+                        >
+                        <span
+                          class="text-xs font-bold text-amber-800 tabular-nums"
+                          >₹5,500 · 10 Feb</span
+                        >
+                      </li>
+                      <li
+                        class="rounded-xl border border-rose-100 bg-rose-50/80 px-3 py-2.5 flex justify-between items-center gap-2"
+                      >
+                        <span class="text-sm font-bold text-rose-950"
+                          >Shopping</span
+                        >
+                        <span
+                          class="text-xs font-bold text-rose-900 tabular-nums"
+                          >₹3,200 · 10 Feb</span
+                        >
+                      </li>
+                      <li
+                        class="rounded-xl border border-violet-100 bg-violet-50/70 px-3 py-2.5 flex justify-between items-center gap-2"
+                      >
+                        <span class="text-sm font-bold text-violet-950"
+                          >Subscription</span
+                        >
+                        <span
+                          class="text-xs font-bold text-violet-900 tabular-nums"
+                          >₹499 · 14 Feb</span
+                        >
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div
+                  class="mt-5 rounded-xl border border-dashed border-[var(--line)] bg-[var(--bg)] px-4 py-3"
+                >
+                  <div
+                    class="grid grid-cols-4 gap-2 text-[10px] sm:text-xs font-bold text-[var(--secondary)] uppercase tracking-wide pb-2 border-b border-[var(--line)]"
+                  >
+                    <span>Date</span>
+                    <span>Type</span>
+                    <span>Amount</span>
+                    <span class="text-right">Note</span>
+                  </div>
+                  <div
+                    class="grid grid-cols-4 gap-2 items-center text-xs sm:text-sm py-2.5 font-semibold text-[var(--primary)]"
+                  >
+                    <span class="tabular-nums text-[var(--secondary)]"
+                      >2026-02-10</span
+                    >
+                    <span>Grocery</span>
+                    <span class="tabular-nums">₹5,500</span>
+                    <span class="text-right"
+                      ><span
+                        class="inline-block rounded-lg bg-slate-100 text-[var(--secondary)] px-2 py-0.5 text-[10px] font-bold"
+                        >Demo</span
+                      ></span
+                    >
+                  </div>
+                  <div
+                    class="grid grid-cols-4 gap-2 items-center text-xs sm:text-sm py-2.5 font-semibold text-[var(--primary)] border-t border-[var(--line)]"
+                  >
+                    <span class="tabular-nums text-[var(--secondary)]"
+                      >2026-02-10</span
+                    >
+                    <span>Shopping</span>
+                    <span class="tabular-nums">₹3,200</span>
+                    <span class="text-right"
+                      ><span
+                        class="inline-block rounded-lg bg-slate-100 text-[var(--secondary)] px-2 py-0.5 text-[10px] font-bold"
+                        >Demo</span
+                      ></span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="features"
+        class="py-20 sm:py-24 bg-[var(--card)] border-y border-[var(--line)]"
+        aria-labelledby="features-heading"
+      >
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="text-center mb-14 max-w-2xl mx-auto reveal">
+            <h2
+              id="features-heading"
+              class="text-3xl sm:text-4xl font-extrabold text-[var(--primary)] tracking-tight mb-3"
+            >
+              Built for clarity
+            </h2>
+            <p
+              class="text-lg text-[var(--secondary)] font-medium leading-relaxed"
+            >
+              Same power you rely on—presented in a calmer, product-grade
+              layout.
+            </p>
+          </div>
+          <div class="grid md:grid-cols-3 gap-5 lg:gap-6">
+            <article class="feature-card reveal group dash-card p-7 lg:p-8">
+              <div
+                class="w-11 h-11 rounded-xl bg-[var(--accent-muted)] flex items-center justify-center mb-5"
+              >
+                <svg
+                  class="w-5 h-5 text-[var(--accent-hover)]"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                  />
+                </svg>
+              </div>
+              <h3 class="text-lg font-extrabold text-[var(--primary)] mb-2">
+                Expense tracking
+              </h3>
+              <p
+                class="text-[var(--secondary)] font-medium leading-relaxed text-sm sm:text-base"
+              >
+                Add and delete entries fast—your ledger stays accurate without
+                friction.
+              </p>
+            </article>
+            <article class="feature-card reveal group dash-card p-7 lg:p-8">
+              <div
+                class="w-11 h-11 rounded-xl bg-[var(--primary-soft)] flex items-center justify-center mb-5"
+              >
+                <svg
+                  class="w-5 h-5 text-[var(--primary)]"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  />
+                </svg>
+              </div>
+              <h3 class="text-lg font-extrabold text-[var(--primary)] mb-2">
+                Monthly reports
+              </h3>
+              <p
+                class="text-[var(--secondary)] font-medium leading-relaxed text-sm sm:text-base"
+              >
+                Open any month and year to see totals and patterns in one place.
+              </p>
+            </article>
+            <article class="feature-card reveal group dash-card p-7 lg:p-8">
+              <div
+                class="w-11 h-11 rounded-xl bg-slate-100 flex items-center justify-center mb-5"
+              >
+                <svg
+                  class="w-5 h-5 text-slate-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                  />
+                </svg>
+              </div>
+              <h3 class="text-lg font-extrabold text-[var(--primary)] mb-2">
+                Insights &amp; reports
+              </h3>
+              <p
+                class="text-[var(--secondary)] font-medium leading-relaxed text-sm sm:text-base"
+              >
+                Charts and summaries that make habits obvious—not overwhelming.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="pricing"
+        class="py-16 sm:py-24 bg-[var(--bg)]"
+        aria-labelledby="pricing-heading"
+      >
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="text-center mb-12 reveal">
+            <h2
+              id="pricing-heading"
+              class="text-3xl sm:text-4xl font-extrabold text-[var(--primary)] tracking-tight mb-3"
+            >
+              Simple, transparent pricing
+            </h2>
+            <p
+              class="text-[var(--secondary)] text-lg font-medium max-w-xl mx-auto"
+            >
+              Choose what fits. No hidden fees.
+            </p>
+          </div>
+          <div class="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            <div class="reveal dash-card p-8 flex flex-col">
+              <h3 class="text-2xl font-extrabold text-[var(--primary)]">
+                Starter
+              </h3>
+              <div class="mt-4 flex items-baseline gap-1">
+                <span class="text-4xl font-extrabold text-[var(--primary)]"
+                  >Free</span
+                >
+              </div>
+              <p class="text-[var(--secondary)] font-medium mt-3">
+                Perfect for personal expense tracking
+              </p>
+              <ul class="mt-6 space-y-3 text-[var(--text)] flex-1 font-medium">
+                <li class="flex gap-3">
+                  <svg
+                    class="w-5 h-5 shrink-0 text-emerald-600 mt-0.5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                  <span>Up to 100 yearly transactions</span>
+                </li>
+                <li class="flex gap-3">
+                  <svg
+                    class="w-5 h-5 shrink-0 text-emerald-600 mt-0.5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                  <span>Basic expense categories</span>
+                </li>
+                <li class="flex gap-3">
+                  <svg
+                    class="w-5 h-5 shrink-0 text-emerald-600 mt-0.5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                  <span>Monthly summary reports</span>
+                </li>
+              </ul>
+              <button
+                type="button"
+                class="mt-8 w-full rounded-xl border-2 border-[var(--line)] bg-[var(--bg)] px-6 py-3.5 font-bold text-[var(--secondary)] cursor-default focus-ring"
+                disabled
+                aria-disabled="true"
+              >
+                By default
+              </button>
+            </div>
+
+            <div
+              class="reveal pricing-popular dash-card p-8 flex flex-col relative overflow-hidden bg-[var(--card)]"
+            >
+              <div
+                class="absolute top-0 right-0 w-40 h-40 bg-[var(--accent-muted)] rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"
+                aria-hidden="true"
+              ></div>
+              <span
+                class="inline-flex w-fit rounded-full bg-[var(--accent)] text-[var(--primary)] text-xs font-extrabold uppercase tracking-wide px-3 py-1.5 mb-4"
+                >Most popular</span
+              >
+              <h3 class="text-2xl font-extrabold text-[var(--primary)]">
+                Basic
+              </h3>
+              <div class="mt-4 flex items-baseline gap-1">
+                <span class="text-4xl font-extrabold text-[var(--primary)]"
+                  >$25</span
+                >
+                <span class="text-[var(--secondary)] font-semibold"
+                  >/ year</span
+                >
+              </div>
+              <p class="text-[var(--secondary)] font-medium mt-3">
+                For those who want more control
+              </p>
+              <ul
+                class="mt-6 space-y-3 text-[var(--text)] flex-1 relative z-[1] font-medium"
+              >
+                <li class="flex gap-3">
+                  <svg
+                    class="w-5 h-5 shrink-0 text-[var(--accent-hover)] mt-0.5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                  <span>Unlimited transactions</span>
+                </li>
+                <li class="flex gap-3">
+                  <svg
+                    class="w-5 h-5 shrink-0 text-[var(--accent-hover)] mt-0.5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                  <span>Custom categories</span>
+                </li>
+                <li class="flex gap-3">
+                  <svg
+                    class="w-5 h-5 shrink-0 text-[var(--accent-hover)] mt-0.5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                  <span>Detailed analytics</span>
+                </li>
+                <li class="flex gap-3">
+                  <svg
+                    class="w-5 h-5 shrink-0 text-[var(--accent-hover)] mt-0.5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                  <span>Export reports</span>
+                </li>
+                <li class="flex gap-3">
+                  <svg
+                    class="w-5 h-5 shrink-0 text-[var(--accent-hover)] mt-0.5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                  <span>Budget alerts</span>
+                </li>
+              </ul>
+              <button
+                type="button"
+                id="purchaseBtn"
+                class="relative z-[1] mt-8 w-full rounded-xl bg-[var(--primary)] text-white px-6 py-3.5 font-bold hover:bg-[#1e293b] transition-colors focus-ring"
+              >
+                Purchase (in progress)
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="bg-[var(--primary)] text-[#94a3b8] py-12" role="contentinfo">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-10 items-start">
+          <div>
+            <h3 class="text-white text-lg font-extrabold mb-4">Tracklio</h3>
+            <p class="text-sm font-medium leading-relaxed">
+              Track, analyze, and take control of your financial journey with
+              Tracklio.
+            </p>
+          </div>
+          <div>
+            <h4 class="text-white text-sm font-extrabold mb-4">Company</h4>
+            <ul class="space-y-2 text-sm font-medium">
+              <li>
+                <a
+                  href="{{ url_for('about') }}"
+                  class="hover:text-white transition-colors focus-ring rounded-sm inline-block py-0.5"
+                  >About</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="text-white text-sm font-extrabold mb-4">Contact us</h4>
+            <ul class="space-y-2 text-sm font-medium">
+              <li>
+                <a
+                  href="{{ url_for('contact') }}"
+                  class="hover:text-white transition-colors focus-ring rounded-sm inline-block py-0.5"
+                  >Contact</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div
+            class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6"
+          >
+            <div>
+              <h4 class="text-white text-sm font-extrabold mb-4">Legal</h4>
+              <ul class="space-y-2 text-sm font-medium">
+                <li>
+                  <a
+                    href="{{ url_for('privacy_policy') }}"
+                    class="hover:text-white transition-colors focus-ring rounded-sm inline-block py-0.5"
+                    >Privacy Policy</a
+                  >
+                </li>
+                <li>
+                  <a
+                    href="{{ url_for('termsofservice') }}"
+                    class="hover:text-white transition-colors focus-ring rounded-sm inline-block py-0.5"
+                    >Terms of Service</a
+                  >
+                </li>
+              </ul>
+            </div>
+            <a
+              href="https://www.linkedin.com/in/omkar-garad-9210b522b/"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-[#94a3b8] hover:text-[var(--accent)] transition-colors focus-ring rounded-md p-1"
+              aria-label="Omkar Garad on LinkedIn"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                class="w-6 h-6"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  d="M4.98 3.5C4.98 4.88 3.88 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1 4.98 2.12 4.98 3.5zM.5 8h4v14h-4V8zm7 0h3.6v2h.05c.5-.9 1.75-1.85 3.6-1.85 3.85 0 4.55 2.5 4.55 5.75V22h-4v-7.5c0-1.8 0-4.1-2.5-4.1s-2.9 1.95-2.9 4V22h-4V8z"
+                />
+              </svg>
+            </a>
+          </div>
+        </div>
+        <div
+          class="border-t border-white/10 mt-10 pt-6 text-sm text-center text-[#64748b] font-medium"
+        >
+          <p>&copy; 2026 Tracklio. All rights reserved.</p>
+          <p class="mt-1">Crafted with care by Omkar Garad</p>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      (function () {
+        const menuToggle = document.getElementById("menu-toggle");
+        const mobileMenu = document.getElementById("mobile-menu");
+        const mobileLinks = mobileMenu ? mobileMenu.querySelectorAll("a") : [];
+
+        function setMenuOpen(open) {
+          if (!mobileMenu || !menuToggle) return;
+          mobileMenu.classList.toggle("hidden", !open);
+          mobileMenu.hidden = !open;
+          menuToggle.setAttribute("aria-expanded", open ? "true" : "false");
+          menuToggle.setAttribute(
+            "aria-label",
+            open ? "Close menu" : "Open menu",
+          );
+          if (open) {
+            mobileMenu.removeAttribute("hidden");
+          } else {
+            mobileMenu.setAttribute("hidden", "");
+          }
+          document.body.style.overflow = open ? "hidden" : "";
+        }
+
+        if (menuToggle && mobileMenu) {
+          menuToggle.addEventListener("click", function () {
+            const open = mobileMenu.classList.contains("hidden");
+            setMenuOpen(open);
+          });
+
+          mobileLinks.forEach(function (link) {
+            link.addEventListener("click", function () {
+              setMenuOpen(false);
+            });
+          });
+
+          document.addEventListener("keydown", function (e) {
+            if (
+              e.key === "Escape" &&
+              !mobileMenu.classList.contains("hidden")
+            ) {
+              setMenuOpen(false);
+              menuToggle.focus();
+            }
+          });
+        }
+
+        var reduceMotion = window.matchMedia(
+          "(prefers-reduced-motion: reduce)",
+        ).matches;
+        if (!reduceMotion) {
+          var observer = new IntersectionObserver(
+            function (entries) {
+              entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                  entry.target.classList.add("is-visible");
+                }
+              });
+            },
+            { rootMargin: "0px 0px -8% 0px", threshold: 0.08 },
+          );
+          document.querySelectorAll(".reveal").forEach(function (el) {
+            observer.observe(el);
+          });
+        } else {
+          document.querySelectorAll(".reveal").forEach(function (el) {
+            el.classList.add("is-visible");
+          });
+        }
+      })();
+    </script>
+  </body>
 </html>
-
-    

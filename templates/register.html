@@ -1,317 +1,297 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Register Form</title>
-    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/register.css') }}"> -->
-    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
-    <style>
-        /* General Reset */
-body, html {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Arial', sans-serif;
-    background-color: #eef2f7;
-}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create account — Tracklio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    {% include 'includes/auth_styles.html' %}
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="{{ url_for('static', filename='images/favicon.ico') }}"
+    />
+  </head>
+  <body class="auth-page auth-register">
+    <a class="auth-skip" href="#main">Skip to form</a>
 
-/* Main container styling */
-.main {
-    width: 100%;
-    max-width: 400px;
-    margin: 100px auto;
-    padding: 25px;
-    background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.15);
-    text-align: center;
-    transition: all 0.3s ease; /* Smooth transition effect */
-}
+    <div class="auth-grid">
+      <div class="auth-form-col" id="main">
+        <div class="auth-form-inner">
+          <div class="auth-brand-row">
+            <a class="auth-logo" href="{{ url_for('landing') }}">Tracklio</a>
+            <a class="auth-link-top" href="{{ url_for('login') }}">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                aria-hidden="true"
+              >
+                <path
+                  d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"
+                />
+              </svg>
+              Sign in
+            </a>
+          </div>
 
-/* Hover effect for the main container */
-.main:hover {
-    box-shadow: 0px 12px 30px rgba(0, 0, 0, 0.3); /* Darker shadow */
-    transform: translateY(-5px); /* Moves the form up */
-}
+          <h1 class="auth-title">Create your account</h1>
+          <p class="auth-subtitle">
+            Pick a username and password—you’ll be logged in right after.
+          </p>
 
-/* Headings */
-.main h3 {
-    font-size: 1.8rem;
-    color: #34495e;
-    margin-bottom: 20px;
-    font-weight: bold;
-}
-
-/* Flash messages */
-.flash-message {
-    padding: 10px;
-    margin: 15px 0;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    color: #ffffff;
-    display: block;
-}
-
-.flash-message.success {
-    background-color: #27ae60; /* Green for success */
-}
-
-.flash-message.danger {
-    background-color: #e74c3c; /* Red for error */
-}
-
-.flash-message.info {
-    background-color: #3498db; /* Blue for info */
-}
-
-.flash-message.warning {
-    background-color: #f39c12; /* Yellow for warnings */
-}
-
-
-/* Form styling */
-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-/* Labels */
-form label {
-    font-size: 1rem;
-    color: #2c3e50;
-    text-align: left;
-}
-
-/* Input fields */
-form input {
-    width: 89%;
-    padding: 12px;
-    font-size: 1rem;
-    color: #34495e;
-    border: 1px solid #bdc3c7;
-    border-radius: 8px;
-    background: #ecf0f1;
-    transition: all 0.3s ease;
-}
-
-form input:focus {
-    border-color: #3498db;
-    outline: none;
-    background: #ffffff;
-    box-shadow: 0px 4px 10px rgba(52, 152, 219, 0.2);
-}
-
-/* Submit button */
-.wrap button {
-    padding: 12px;
-    font-size: 1rem;
-    font-weight: bold;
-    color: #ffffff;
-    background: #14B8A6;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.wrap button:hover {
-    background: #14B8A6;
-}
-
-/* Bottom text */
-.text-center {
-    font-size: 0.9rem;
-    color: #7f8c8d;
-    margin-top: 15px;
-}
-
-.text-center a {
-    color: #3498db;
-    text-decoration: none;
-    font-weight: bold;
-    transition: color 0.3s ease;
-}
-
-.text-center a:hover {
-    color: #2980b9;
-}
-
-/* Responsive design */
-@media (max-width: 480px) {
-    .main {
-        margin: 50px 10px;
-        padding: 20px;
-    }
-    form input, .wrap button {
-        font-size: 0.9rem;
-    }
-    .main h3 {
-        font-size: 1.5rem;
-    }
-}
-
-
-
-
-body {
-        transition: filter 0.3s ease; /* Smooth transition for the blur effect */
-    }
-
-    .loader {
-        display: none;
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 1000; /* Ensure loader appears above the blur */
-    }
-
-    .circle {
-        width: 15px;
-        height: 15px;
-        margin: 0 8px;
-        border-radius: 50%;
-        background-color: teal;
-        animation: bounce-wave 1.2s infinite ease-in-out;
-    }
-
-    .circle:nth-child(1) {
-        animation-delay: 0s;
-    }
-
-    .circle:nth-child(2) {
-        animation-delay: 0.3s;
-    }
-
-    .circle:nth-child(3) {
-        animation-delay: 0.6s;
-    }
-
-    @keyframes bounce-wave {
-        0%, 100% {
-            transform: translateY(0);
-        }
-        50% {
-            transform: translateY(-20px); /* Bouncing effect */
-        }
-    }
-
-    </style>
-</head>
-<body>
-    <div class="main" id="flash-messages">
-        <h3>Register Yourself</h3>
-
-        {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-        <div id="flash-messages-container">
+          {% with messages = get_flashed_messages(with_categories=true) %} {% if
+          messages %}
+          <div
+            class="auth-flash-stack"
+            role="region"
+            aria-label="Notifications"
+          >
             {% for category, message in messages %}
-                <div class="flash-message {{ category }}">
-                    {{ message }}
-                </div>
+            <div class="auth-flash {{ category }}" role="alert">
+              {{ message }}
+            </div>
             {% endfor %}
+          </div>
+          {% endif %} {% endwith %}
+
+          <form
+            class="auth-form-fields"
+            action="{{ url_for('register') }}"
+            method="POST"
+            id="register-form"
+          >
+            <div class="auth-field">
+              <label for="username">Username</label>
+              <input
+                class="auth-input"
+                type="text"
+                id="username"
+                name="username"
+                autocomplete="username"
+                placeholder="Choose a username"
+                required
+                aria-required="true"
+                minlength="1"
+              />
+              <p
+                class="auth-status"
+                id="username-status"
+                role="status"
+                aria-live="polite"
+              ></p>
+            </div>
+            <div class="auth-field">
+              <label for="password">Password</label>
+              <div class="auth-input-wrap">
+                <input
+                  class="auth-input"
+                  type="password"
+                  id="password"
+                  name="password"
+                  autocomplete="new-password"
+                  placeholder="Create a password"
+                  required
+                  aria-required="true"
+                  minlength="1"
+                />
+                <button
+                  type="button"
+                  class="auth-toggle-pw"
+                  id="toggle-password"
+                  aria-label="Show password"
+                  aria-pressed="false"
+                  aria-controls="password"
+                >
+                  <svg
+                    class="icon-eye"
+                    width="22"
+                    height="22"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    aria-hidden="true"
+                  >
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                  <svg
+                    class="icon-eye-off"
+                    width="22"
+                    height="22"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    style="display: none"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
+                    />
+                    <line x1="1" y1="1" x2="23" y2="23" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <button
+              type="submit"
+              class="auth-submit auth-submit--register"
+              id="register-button"
+            >
+              <span class="auth-submit-label">Create account</span>
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                aria-hidden="true"
+              >
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <line x1="19" y1="8" x2="19" y2="14" />
+                <line x1="22" y1="11" x2="16" y2="11" />
+              </svg>
+            </button>
+          </form>
+
+          <p class="auth-footer-text">
+            Already registered? <a href="{{ url_for('login') }}">Sign in</a>
+          </p>
+
+          <div class="auth-page-footer">
+            <span>&copy; 2026 Tracklio</span>
+            <a href="{{ url_for('landing') }}">Back to home</a>
+          </div>
         </div>
-    {% endif %}
-{% endwith %}
+      </div>
 
-
-<form action="{{ url_for('register') }}" method="POST" id="register-form">
-    <label for="username">Username:</label>
-    <input type="text" id="username" name="username" placeholder="Enter your Username" required>
-    <span id="username-status"></span> <!-- ✅ / ❌ will be shown here -->
-
-    <label for="password">Password:</label>
-    <input type="password" id="password" name="password" placeholder="Enter your Password" required>
-
-    <div class="wrap">
-        <button type="submit">Register</button>
-    </div>
-</form>
-
-        <div id="loader" class="loader" style="display: none;">
-            <div class="circle"></div>
-            <div class="circle"></div>
-            <div class="circle"></div>
+      <div class="auth-visual-col auth-visual-col--register" aria-hidden="true">
+        <div class="auth-visual-inner">
+          <p class="auth-visual-kicker">Tracklio</p>
+          <h2 class="auth-visual-title">Manage your money with less effort.</h2>
+          <p class="auth-visual-body">
+            Simple logging, monthly rollups, and clear totals—so checking in
+            never feels like a chore.
+          </p>
+          <div class="auth-stat-grid">
+            <div class="auth-stat">
+              <div class="auth-stat-val">₹8.7k</div>
+              <div class="auth-stat-lbl">Sample month spend</div>
+            </div>
+            <div class="auth-stat">
+              <div class="auth-stat-val">14</div>
+              <div class="auth-stat-lbl">Categories tracked</div>
+            </div>
+            <div class="auth-stat">
+              <div class="auth-stat-val">100%</div>
+              <div class="auth-stat-lbl">Yours—private data</div>
+            </div>
+            <div class="auth-stat">
+              <div class="auth-stat-val">3+</div>
+              <div class="auth-stat-lbl">Years refined for you</div>
+            </div>
+          </div>
         </div>
-
-        <p class="text-center">Already have an account? <a href="{{ url_for('login') }}">Login</a></p>
+      </div>
     </div>
-    
+
     <script>
-        document.getElementById("username").addEventListener("input", function() {
-        let username = this.value.trim();
-        let statusSpan = document.getElementById("username-status");
-
-        if (username.length === 0) {
-            statusSpan.innerHTML = ""; 
-            return;
+      (function () {
+        var pw = document.getElementById("password");
+        var btn = document.getElementById("toggle-password");
+        if (btn && pw) {
+          var eye = btn.querySelector(".icon-eye");
+          var eyeOff = btn.querySelector(".icon-eye-off");
+          btn.addEventListener("click", function () {
+            var show = pw.type === "password";
+            pw.type = show ? "text" : "password";
+            btn.setAttribute("aria-pressed", show ? "true" : "false");
+            btn.setAttribute(
+              "aria-label",
+              show ? "Hide password" : "Show password",
+            );
+            if (eye) eye.style.display = show ? "none" : "block";
+            if (eyeOff) eyeOff.style.display = show ? "block" : "none";
+          });
         }
 
-        fetch("/check_username", {
-            method: "POST",
-            body: JSON.stringify({ username: username }),
-            headers: { "Content-Type": "application/json" }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.exists) {
-                statusSpan.innerHTML = "❌ Username already taken";
-                statusSpan.style.color = "red";
-            } else {
-                statusSpan.innerHTML = "✅ Username available";
-                statusSpan.style.color = "green";
+        var usernameInput = document.getElementById("username");
+        var statusEl = document.getElementById("username-status");
+        if (usernameInput && statusEl) {
+          var timer;
+          usernameInput.addEventListener("input", function () {
+            var username = usernameInput.value.trim();
+            clearTimeout(timer);
+            if (username.length === 0) {
+              statusEl.textContent = "";
+              statusEl.className = "auth-status";
+              return;
             }
-        })
-        .catch(error => console.error("Error:", error));
-    });
+            timer = setTimeout(function () {
+              fetch('{{ url_for("check_username") }}', {
+                method: "POST",
+                body: JSON.stringify({ username: username }),
+                headers: { "Content-Type": "application/json" },
+              })
+                .then(function (r) {
+                  return r.json();
+                })
+                .then(function (data) {
+                  if (data.exists) {
+                    statusEl.textContent = "Username already taken";
+                    statusEl.className = "auth-status auth-status--bad";
+                  } else {
+                    statusEl.textContent = "Username available";
+                    statusEl.className = "auth-status auth-status--ok";
+                  }
+                })
+                .catch(function () {
+                  statusEl.textContent = "";
+                  statusEl.className = "auth-status";
+                });
+            }, 320);
+          });
+        }
 
+        var form = document.getElementById("register-form");
+        var submitBtn = document.getElementById("register-button");
+        if (form && submitBtn) {
+          form.addEventListener("submit", function () {
+            if (!form.checkValidity()) return;
+            submitBtn.disabled = true;
+            submitBtn.setAttribute("aria-busy", "true");
+            var label = submitBtn.querySelector(".auth-submit-label");
+            if (label) label.textContent = "Creating account…";
+          });
+        }
 
-
-
-        // Loader Animation
-        document.getElementById('register-form').onsubmit = function() {
-            document.getElementById('loader').style.display = 'flex'; // Show loader
-
-setTimeout(function() {
-    document.getElementById('loader').style.display = 'none'; // Hide loader after 3 seconds
-}, 2000);
-
-        };
-
-
-
-
-
-        document.addEventListener('DOMContentLoaded', function () {
-    // Show flash messages for only 3 seconds
-    const flashMessages = document.querySelectorAll('.flash-message');
-    
-    flashMessages.forEach(function (message) {
-        setTimeout(() => {
-            message.style.transition = 'opacity 0.5s ease-out';
-            message.style.opacity = '0'; // Fade out
-            setTimeout(() => {
-                message.remove(); // Remove after fade-out
-            }, 500); // Wait for the fade-out animation
-        }, 3000); // Wait for 3 seconds before fading out
-    });
-});
-
-document.getElementById('login-form').onsubmit = function() {
-    document.getElementById('loader').style.display = 'flex'; // Show loader
-
-    setTimeout(function() {
-        document.getElementById('loader').style.display = 'none'; // Hide loader after 3 seconds
-    }, 6000);
-};
-
+        var reduce = window.matchMedia(
+          "(prefers-reduced-motion: reduce)",
+        ).matches;
+        if (!reduce) {
+          document.querySelectorAll(".auth-flash").forEach(function (el) {
+            setTimeout(function () {
+              el.style.transition = "opacity 0.4s ease";
+              el.style.opacity = "0";
+              setTimeout(function () {
+                el.remove();
+              }, 400);
+            }, 5000);
+          });
+        }
+      })();
     </script>
-</body>
+  </body>
 </html>
-
-
-
-

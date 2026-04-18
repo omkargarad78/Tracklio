@@ -3,183 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact Us - Expense Tracker</title>
+    <title>Contact — Tracklio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    {% include 'includes/footer_pages_styles.html' %}
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #ffffff;
-            color: #333;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            overflow: hidden; /* Prevents scrolling */
-        }
-
-        header {
-            background-color: #008080;
-            color: white;
-            text-align: center;
-            padding: 4px 0; /* Reduced header size */
-            font-size: 14px; /* Reduced font size */
-        }
-
-        .container {
-            flex: 1;
-            max-width: 600px; /* Reduced container size */
-            margin: 20px auto;
-            padding: 20px;
-            background: #f9f9f9;
-            border-radius: 8px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-            box-sizing: border-box;
-        }
-
-        h2 {
-            color: #008080;
-            text-align: center;
-            margin-bottom: 16px; /* Reduced margin */
-            font-size: 20px; /* Slightly smaller heading */
-        }
-
-        .contact-form {
-            display: flex;
-            flex-direction: column;
-            gap: 12px; /* Reduced gap between fields */
-        }
-
-        .contact-form label {
-            font-weight: bold;
-            margin-bottom: 6px; /* Reduced label spacing */
-            font-size: 14px; /* Reduced label font size */
-        }
-
-        .contact-form input,
-        .contact-form textarea {
-            padding: 10px; /* Reduced padding */
-            margin-bottom: 10px; /* Reduced spacing */
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-size: 14px; /* Reduced font size */
-            width: 100%;
-            box-sizing: border-box;
-            transition: border 0.3s ease;
-        }
-
-        .contact-form input:focus,
-        .contact-form textarea:focus {
-            border-color: #008080;
-            outline: none;
-        }
-
-        .contact-form button {
-            background-color: #008080;
-            color: white;
-            padding: 10px 16px; /* Reduced padding */
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px; /* Reduced font size */
-            margin-top: 10px;
-            transition: background-color 0.3s ease;
-        }
-
-        .contact-form button:hover {
-            background-color: #006666;
-        }
-
-        .flash-container {
-            margin-top: 10px;
-            margin-bottom: 16px;
-            text-align: center;
-        }
-
-        .flash-message {
-            padding: 10px;
-            border-radius: 8px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            display: inline-block;
-            width: 80%;
-            opacity: 1;
-            transition: opacity 0.5s ease-out;
-        }
-
-        .success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        /* Prevents body from scrolling */
-        html, body {
-            overflow-x: hidden;
-            height: 100%; /* Prevents vertical scrolling */
-        }
-    </style>
 </head>
-<body>
+<body class="fp-page">
+    <a class="fp-skip" href="#main">Skip to content</a>
 
-    <header>
-        <h1>Contact Us</h1>
-    </header>
+    {% set fp_nav_active = 'contact' %}
+    {% include 'includes/footer_page_nav.html' %}
 
-    <div class="container">
-        <!-- Flash Messages Section -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <div class="flash-container">
-                    {% for category, message in messages %}
-                        <div class="flash-message {{ category }}">{{ message }}</div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        {% endwith %}
-
-        <section>
-            <h2>We'd Love to Hear from You!</h2>
-            <p>If you have any questions, feedback, or suggestions, feel free to reach out using the form below.</p>
-
-            <form action="{{ url_for('contact') }}" method="POST" class="contact-form">
-                <label for="name">Your Name:</label>
-                <input type="text" id="name" name="name" placeholder="Enter your name" required>
-
-                <label for="email">Your Email:</label>
-                <input type="email" id="email" name="email" placeholder="Enter your email" required>
-
-                <label for="message">Your Message:</label>
-                <textarea id="message" name="message" rows="4" placeholder="Enter your message here..." required></textarea>
-
-                <button type="submit">Send Message</button>
-            </form>
-        </section>
+    <div class="fp-hero">
+        <div class="fp-hero-inner">
+            <h1>Contact us</h1>
+            <p class="fp-hero-meta">We read every message and reply when we can.</p>
+        </div>
     </div>
 
-    <!-- JavaScript for hiding the flash message after 3 seconds -->
+    <main id="main" class="fp-main">
+        <div class="fp-container fp-container--narrow fp-contact-wrap">
+            <div class="fp-card">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="fp-flash-wrap" role="region" aria-label="Notifications">
+                            {% for category, message in messages %}
+                                <div class="fp-flash {{ category }}" role="alert">{{ message }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                <h2 class="fp-form-title">Send a message</h2>
+                <p class="fp-card-intro">Share a question, bug report, or suggestion—we’ll get back to you via email when possible.</p>
+
+                <form class="fp-form" action="{{ url_for('contact') }}" method="POST" id="contact-form">
+                    <div class="fp-field">
+                        <label for="name">Your name</label>
+                        <input type="text" id="name" name="name" placeholder="Jane Doe" required autocomplete="name" aria-required="true">
+                    </div>
+                    <div class="fp-field">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" placeholder="you@example.com" required autocomplete="email" aria-required="true">
+                    </div>
+                    <div class="fp-field">
+                        <label for="message">Message</label>
+                        <textarea id="message" name="message" rows="5" placeholder="How can we help?" required aria-required="true"></textarea>
+                    </div>
+                    <button type="submit">Send message</button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    {% include 'includes/footer_page_site_footer.html' %}
+
     <script>
-        // Check if there are any flash messages on page load
-        document.addEventListener("DOMContentLoaded", function() {
-            var flashMessages = document.querySelectorAll('.flash-message');
-            
-            flashMessages.forEach(function(message) {
-                setTimeout(function() {
-                    message.style.opacity = 0;
-                }, 3000); // Wait for 3 seconds before starting to fade
-
-                setTimeout(function() {
-                    message.remove(); // Remove the flash message from the DOM after fade out
-                }, 3500); // Remove after 3.5 seconds
+        (function () {
+            var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (reduce) return;
+            document.querySelectorAll('.fp-flash').forEach(function (el) {
+                setTimeout(function () {
+                    el.style.transition = 'opacity 0.4s ease';
+                    el.style.opacity = '0';
+                    setTimeout(function () { el.remove(); }, 400);
+                }, 4500);
             });
-        });
+        })();
     </script>
-
 </body>
 </html>
