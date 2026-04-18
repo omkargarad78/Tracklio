@@ -1,283 +1,398 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Login Form</title>
-    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}"> -->
-    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
-     <style>
-        /* General Reset */
-body, html {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Arial', sans-serif;
-    background-color: #f4f7fc;
-}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign in — Tracklio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    {% include 'includes/auth_styles.html' %}
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="{{ url_for('static', filename='images/favicon.ico') }}"
+    />
+  </head>
+  <body class="auth-page auth-login">
+    <a class="auth-skip" href="#main">Skip to form</a>
 
-/* Main container styling */
-.main {
-    width: 100%;
-    max-width: 400px;
-    margin: 100px auto;
-    padding: 20px;
-    background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.15);
-    text-align: center;
-}
+    <div class="auth-grid">
+      <div class="auth-form-col" id="main">
+        <div class="auth-form-inner">
+          <div class="auth-brand-row auth-brand-row--single">
+            <a class="auth-logo" href="{{ url_for('landing') }}">Tracklio</a>
+          </div>
 
-.main:hover {
-    transition: all 0.3s ease; /* Smooth transition effect */
-    box-shadow: 0px 12px 30px rgba(0, 0, 0, 0.3); /* Darker shadow */
-    transform: translateY(-5px); /* Moves the form up */
-}
+          <h1 class="auth-title">Welcome back</h1>
+          <p class="auth-subtitle">
+            Enter your username and password to open your dashboard.
+          </p>
 
-/* Headings */
-.main h3 {
-    font-size: 1.8rem;
-    color: #2c3e50;
-    margin-bottom: 20px;
-}
-
-/* Flash messages */
-.flash-message {
-    padding: 10px;
-    margin: 15px 0;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    color: #ffffff;
-    display: block;
-    opacity: 1; /* Ensure it's visible initially */
-    transition: opacity 0.5s ease-out; /* Smooth fade-out */
-}
-
-.flash-message.success {
-    background-color: #27ae60; /* Green for success */
-}
-
-.flash-message.danger {
-    background-color: #e74c3c; /* Red for error */
-}
-
-.flash-message.info {
-    background-color: #3498db; /* Blue for info */
-}
-
-.flash-message.warning {
-    background-color: #f39c12; /* Yellow for warnings */
-}
-
-
-/* Form styling */
-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-/* Labels */
-form label {
-    font-size: 1rem;
-    color: #34495e;
-    text-align: left;
-}
-
-/* Input fields */
-form input {
-    width: 89%;
-    padding: 12px;
-    font-size: 1rem;
-    color: #34495e;
-    border: 1px solid #bdc3c7;
-    border-radius: 8px;
-    background: #ecf0f1;
-    transition: all 0.3s ease;
-}
-
-form input:focus {
-    border-color: #3498db;
-    outline: none;
-    background: #ffffff;
-    box-shadow: 0px 4px 10px rgba(52, 152, 219, 0.2);
-}
-
-/* Submit button */
-.wrap button {
-    padding: 12px;
-    font-size: 1rem;
-    font-weight: bold;
-    color: #ffffff;
-    background: #3498db;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.wrap button:hover {
-    background: #2980b9;
-}
-
-/* Bottom text */
-.bottom {
-    font-size: 0.9rem;
-    color: #7f8c8d;
-    margin-top: 15px;
-}
-
-.bottom a {
-    color: #3498db;
-    text-decoration: none;
-    font-weight: bold;
-    transition: color 0.3s ease;
-}
-
-.bottom a:hover {
-    color: #2980b9;
-}
-
-/* Responsive design */
-@media (max-width: 480px) {
-    .main {
-        margin: 50px 10px;
-        padding: 15px;
-    }
-    form input, .wrap button {
-        font-size: 0.9rem;
-    }
-    .main h3 {
-        font-size: 1.5rem;
-    }
-}
-
-
-/* Loader Animation */
-body {
-        transition: filter 0.3s ease; /* Smooth transition for the blur effect */
-    }
-
-    .loader {
-        display: none;
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 1000; /* Ensure loader appears above the blur */
-    }
-
-    .circle {
-        width: 15px;
-        height: 15px;
-        margin: 0 8px;
-        border-radius: 50%;
-        background-color: teal;
-        animation: bounce-wave 1.2s infinite ease-in-out;
-    }
-
-    .circle:nth-child(1) {
-        animation-delay: 0s;
-    }
-
-    .circle:nth-child(2) {
-        animation-delay: 0.3s;
-    }
-
-    .circle:nth-child(3) {
-        animation-delay: 0.6s;
-    }
-
-    @keyframes bounce-wave {
-        0%, 100% {
-            transform: translateY(0);
-        }
-        50% {
-            transform: translateY(-20px); /* Bouncing effect */
-        }
-    }
-
-    
-        
-     </style>
-</head>
-<body>
-    <div class="main" id="flash-messages" style="color: brown;">
-        <h3>Enter your login credentials</h3>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <div id="flash-messages-container">
-                    {% for category, message in messages %}
-                        <div class="flash-message {{ category }}">
-                            {{ message }}
-                        </div>  
-                    {% endfor %}
-                </div>
-            {% endif %}
-        {% endwith %}
-
-        <form action="{{ url_for('login') }}" method="POST" id="login-form">
-            <label for="first">Username:</label>
-            <input type="text" id="username" name="username" placeholder="Enter your Username" required>
-
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" placeholder="Enter your Password" required>
-
-            <div class="wrap">
-                <button type="submit" id="login-button">Let's go 🚀</button>
+          {% with messages = get_flashed_messages(with_categories=true) %} {% if
+          messages %}
+          <div
+            class="auth-flash-stack"
+            role="region"
+            aria-label="Notifications"
+          >
+            {% for category, message in messages %}
+            <div class="auth-flash {{ category }}" role="alert">
+              {{ message }}
             </div>
-        </form>
+            {% endfor %}
+          </div>
+          {% endif %} {% endwith %}
 
-        <div id="loader" class="loader" style="display: none;">
-            <div class="circle"></div>
-            <div class="circle"></div>
-            <div class="circle"></div>
+          <form
+            class="auth-form-fields"
+            action="{{ url_for('login') }}"
+            method="POST"
+            id="login-form"
+          >
+            <div class="auth-field">
+              <label for="username">Username</label>
+              <input
+                class="auth-input"
+                type="text"
+                id="username"
+                name="username"
+                autocomplete="username"
+                placeholder="Your username"
+                required
+                aria-required="true"
+                minlength="1"
+              />
+            </div>
+            <div class="auth-field">
+              <label for="password">Password</label>
+              <div class="auth-input-wrap">
+                <input
+                  class="auth-input"
+                  type="password"
+                  id="password"
+                  name="password"
+                  autocomplete="current-password"
+                  placeholder="Your password"
+                  required
+                  aria-required="true"
+                  minlength="1"
+                />
+                <button
+                  type="button"
+                  class="auth-toggle-pw"
+                  id="toggle-password"
+                  aria-label="Show password"
+                  aria-pressed="false"
+                  aria-controls="password"
+                >
+                  <svg
+                    class="icon-eye"
+                    width="22"
+                    height="22"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    aria-hidden="true"
+                  >
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                  <svg
+                    class="icon-eye-off"
+                    width="22"
+                    height="22"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    style="display: none"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
+                    />
+                    <line x1="1" y1="1" x2="23" y2="23" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <button
+              type="submit"
+              class="auth-submit auth-submit--login"
+              id="login-button"
+            >
+              <span class="auth-submit-label">Log in</span>
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                aria-hidden="true"
+              >
+                <path
+                  d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"
+                />
+              </svg>
+            </button>
+          </form>
+
+          <p class="auth-footer-text">
+            New here? <a href="{{ url_for('register') }}">Create an account</a>
+          </p>
+
+          <div class="auth-page-footer">
+            <span>&copy; 2026 Tracklio</span>
+            <a href="{{ url_for('landing') }}">Back to home</a>
+          </div>
         </div>
+      </div>
 
-        <p class="bottom">Not registered? <a href="{{ url_for('register') }}">Create an account</a></p>
+      <div class="auth-visual-col auth-visual-col--login">
+        <div class="auth-visual-inner">
+          <p class="auth-visual-kicker">Expense clarity</p>
+          <h2 class="auth-visual-title">Know where every rupee goes.</h2>
+          <p class="auth-visual-body">
+            Monthly totals, categories, and habits—organized in one calm
+            workspace built for daily use.
+          </p>
+          <div
+            class="auth-mock-card auth-carousel"
+            id="login-carousel"
+            data-autoplay-ms="2000"
+            role="region"
+            aria-roledescription="carousel"
+            aria-label="Tracklio interface preview"
+          >
+            <div class="auth-carousel-viewport">
+              <div class="auth-carousel-track" id="login-carousel-track">
+                <div class="auth-carousel-slide">
+                  <div class="auth-slide-inner">
+                    <div class="auth-mock-row">
+                      <span class="auth-mock-label">This month</span>
+                      <span class="auth-mock-total">₹8,700</span>
+                    </div>
+                    <div class="auth-mock-bars">
+                      <span class="auth-mock-bar" style="height: 35%"></span>
+                      <span class="auth-mock-bar" style="height: 55%"></span>
+                      <span class="auth-mock-bar" style="height: 42%"></span>
+                      <span
+                        class="auth-mock-bar auth-mock-bar--hot"
+                        style="height: 78%"
+                      ></span>
+                      <span class="auth-mock-bar" style="height: 50%"></span>
+                      <span class="auth-mock-bar" style="height: 62%"></span>
+                    </div>
+                  </div>
+                </div>
+                <div class="auth-carousel-slide">
+                  <div class="auth-slide-inner">
+                    <div class="auth-mock-row">
+                      <span class="auth-mock-label">By category</span>
+                      <span class="auth-mock-total">14</span>
+                    </div>
+                    <div class="auth-mock-cats">
+                      <div class="auth-mock-cat-row">
+                        <span style="width: 4.5rem">Housing</span>
+                        <div class="auth-mock-cat-bar">
+                          <div
+                            class="auth-mock-cat-fill"
+                            style="width: 72%"
+                          ></div>
+                        </div>
+                      </div>
+                      <div class="auth-mock-cat-row">
+                        <span style="width: 4.5rem">Food</span>
+                        <div class="auth-mock-cat-bar">
+                          <div
+                            class="auth-mock-cat-fill"
+                            style="width: 48%"
+                          ></div>
+                        </div>
+                      </div>
+                      <div class="auth-mock-cat-row">
+                        <span style="width: 4.5rem">Other</span>
+                        <div class="auth-mock-cat-bar">
+                          <div
+                            class="auth-mock-cat-fill"
+                            style="width: 28%"
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="auth-carousel-slide">
+                  <div class="auth-slide-inner">
+                    <div class="auth-mock-row">
+                      <span class="auth-mock-label">Budget pace</span>
+                      <span class="auth-mock-total">On track</span>
+                    </div>
+                    <div class="auth-mock-ring" aria-hidden="true">
+                      <div class="auth-mock-ring-inner">62%<br />month</div>
+                    </div>
+                    <p
+                      style="
+                        margin: 0.65rem 0 0;
+                        font-size: 0.75rem;
+                        font-weight: 600;
+                        opacity: 0.8;
+                        text-align: center;
+                      "
+                    >
+                      Sample insight — not your data
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="auth-carousel-dots"
+              role="tablist"
+              aria-label="Choose preview slide"
+            >
+              <button
+                type="button"
+                class="auth-carousel-dot"
+                role="tab"
+                aria-selected="true"
+                aria-label="Slide 1 of 3, spending overview"
+                aria-current="true"
+                data-slide="0"
+              ></button>
+              <button
+                type="button"
+                class="auth-carousel-dot"
+                role="tab"
+                aria-selected="false"
+                aria-current="false"
+                aria-label="Slide 2 of 3, categories"
+                data-slide="1"
+              ></button>
+              <button
+                type="button"
+                class="auth-carousel-dot"
+                role="tab"
+                aria-selected="false"
+                aria-current="false"
+                aria-label="Slide 3 of 3, budget pace"
+                data-slide="2"
+              ></button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script>
-        document.getElementById('login-form').onsubmit = function() {
-    //         const loginButton = document.getElementById('login-button');
-    // loginButton.disabled = true;
-    // loginButton.style.backgroundColor = '#d3d3d3'; // Faint color
-    // loginButton.style.cursor = 'not-allowed';     // Change cursor to not-allowed
-    document.getElementById('loader').style.display = 'flex'; // Show loader
+      (function () {
+        var pw = document.getElementById("password");
+        var btn = document.getElementById("toggle-password");
+        if (btn && pw) {
+          var eye = btn.querySelector(".icon-eye");
+          var eyeOff = btn.querySelector(".icon-eye-off");
+          btn.addEventListener("click", function () {
+            var show = pw.type === "password";
+            pw.type = show ? "text" : "password";
+            btn.setAttribute("aria-pressed", show ? "true" : "false");
+            btn.setAttribute(
+              "aria-label",
+              show ? "Hide password" : "Show password",
+            );
+            if (eye) eye.style.display = show ? "none" : "block";
+            if (eyeOff) eyeOff.style.display = show ? "block" : "none";
+          });
+        }
 
-setTimeout(function() {
-    document.getElementById('loader').style.display = 'none'; // Hide loader after 3 seconds
-}, 2000);
+        var form = document.getElementById("login-form");
+        var submitBtn = document.getElementById("login-button");
+        if (form && submitBtn) {
+          form.addEventListener("submit", function () {
+            if (!form.checkValidity()) return;
+            submitBtn.disabled = true;
+            submitBtn.setAttribute("aria-busy", "true");
+            var label = submitBtn.querySelector(".auth-submit-label");
+            if (label) label.textContent = "Signing in…";
+          });
+        }
 
-        };
+        var carousel = document.getElementById("login-carousel");
+        var track = document.getElementById("login-carousel-track");
+        if (carousel && track) {
+          var dots = carousel.querySelectorAll(".auth-carousel-dot");
+          var n = dots.length;
+          var idx = 0;
+          var ms =
+            parseInt(carousel.getAttribute("data-autoplay-ms"), 10) || 5000;
+          var autoplayTimer;
+          var reduceMotion = window.matchMedia(
+            "(prefers-reduced-motion: reduce)",
+          ).matches;
 
+          function goTo(i) {
+            idx = ((i % n) + n) % n;
+            track.style.transform = "translateX(-" + idx * 100 + "%)";
+            dots.forEach(function (d, j) {
+              var on = j === idx;
+              d.setAttribute("aria-selected", on ? "true" : "false");
+              d.setAttribute("aria-current", on ? "true" : "false");
+            });
+          }
 
+          function next() {
+            goTo(idx + 1);
+          }
 
+          function startAutoplay() {
+            clearInterval(autoplayTimer);
+            if (!reduceMotion && n > 1) {
+              autoplayTimer = setInterval(next, ms);
+            }
+          }
 
-        document.addEventListener('DOMContentLoaded', function () {
-    // Show flash messages for only 3 seconds
-    const flashMessages = document.querySelectorAll('.flash-message');
-    
-    flashMessages.forEach(function (message) {
-        setTimeout(() => {
-            message.style.transition = 'opacity 0.5s ease-out';
-            message.style.opacity = '0'; // Fade out
-            setTimeout(() => {
-                message.remove(); // Remove after fade-out
-            }, 500); // Wait for the fade-out animation
-        }, 3000); // Wait for 3 seconds before fading out
-    });
-});
+          dots.forEach(function (d, j) {
+            d.addEventListener("click", function () {
+              goTo(j);
+              startAutoplay();
+            });
+          });
 
-document.getElementById('login-form').onsubmit = function() {
-    document.getElementById('loader').style.display = 'flex'; // Show loader
+          carousel.addEventListener("mouseenter", function () {
+            clearInterval(autoplayTimer);
+          });
+          carousel.addEventListener("mouseleave", startAutoplay);
+          carousel.addEventListener("focusin", function () {
+            clearInterval(autoplayTimer);
+          });
+          carousel.addEventListener("focusout", function (e) {
+            if (!carousel.contains(e.relatedTarget)) startAutoplay();
+          });
 
-    setTimeout(function() {
-        document.getElementById('loader').style.display = 'none'; // Hide loader after 3 seconds
-    }, 13000);
-};
+          goTo(0);
+          startAutoplay();
+        }
 
+        var reduce = window.matchMedia(
+          "(prefers-reduced-motion: reduce)",
+        ).matches;
+        if (!reduce) {
+          document.querySelectorAll(".auth-flash").forEach(function (el) {
+            setTimeout(function () {
+              el.style.transition = "opacity 0.4s ease";
+              el.style.opacity = "0";
+              setTimeout(function () {
+                el.remove();
+              }, 400);
+            }, 5000);
+          });
+        }
+      })();
     </script>
-</body>
+  </body>
 </html>

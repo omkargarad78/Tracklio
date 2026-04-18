@@ -10,10 +10,18 @@ from email.mime.text import MIMEText
 # Load environment variables from .env
 load_dotenv()
 
-app = Flask(__name__, static_folder='static')
+_BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+app = Flask(
+    __name__,
+    static_folder=os.path.join(_BASE_DIR, 'static'),
+    template_folder=os.path.join(_BASE_DIR, 'templates'),
+)
 
 # Secret Key for session management
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+if not app.config.get('SECRET_KEY'):
+    # Keep DB connectivity untouched; this only enables sessions/flash.
+    app.config['SECRET_KEY'] = os.urandom(32)
 
 # MySQL Configuration for live database
 app.config['MYSQL_HOST'] = os.getenv('MYSQL_HOST')
@@ -31,6 +39,14 @@ SENDER_PASSWORD = os.getenv('SENDER_PASSWORD')
 RECEIVER_EMAIL = os.getenv('RECEIVER_EMAIL')
 
 mysql = MySQL(app)
+
+
+def _get_db():
+    """
+    flask_mysqldb's `.connection` is broken for Flask<3 in some versions because it
+    captures `_app_ctx_stack.top` at import time. Use `.connect` instead.
+    """
+    return mysql.connect
 
 # Before request handler to ensure the user is logged in
 @app.before_request
@@ -50,13 +66,31 @@ def login():
         username = request.form['username']
         password = request.form['password']
 
-        cur = mysql.connection.cursor()
-        cur.execute("SELECT * FROM credentials WHERE username = %s", (username,))
-        user = cur.fetchone()  # This will return a dictionary
+        try:
+            conn = _get_db()
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM credentials WHERE username = %s", (username,))
+            user = cur.fetchone()  # This will return a dictionary
+            cur.close()
+            conn.close()
+        except Exception:
+            app.logger.exception("Login failed due to database connection error")
+            flash('Service temporarily unavailable. Please try again in a moment.', 'danger')
+            return render_template('login.html'), 503
 
         if user:
             # Check if the password is correct
-            if bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8')):
+            stored_password = user.get('password')
+            if isinstance(stored_password, memoryview):
+                stored_password = stored_password.tobytes()
+            elif isinstance(stored_password, str):
+                stored_password = stored_password.encode('utf-8')
+
+            if not isinstance(stored_password, (bytes, bytearray)):
+                flash('Invalid password format stored for this user. Please reset your password.', 'danger')
+                return render_template('login.html'), 400
+
+            if bcrypt.checkpw(password.encode('utf-8'), bytes(stored_password)):
                 # If the password is correct, log in the user
                 session['username'] = username
                 return redirect(url_for('index'))  # Redirect to the index page after successful login
@@ -76,9 +110,15 @@ def register():
         # Hash password before storing it
         hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
 
-        cur = mysql.connection.cursor()
-        cur.execute("SELECT * FROM credentials WHERE username = %s", (username,))
-        existing_user = cur.fetchone()
+        try:
+            conn = _get_db()
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM credentials WHERE username = %s", (username,))
+            existing_user = cur.fetchone()
+        except Exception:
+            app.logger.exception("Registration failed due to database connection error")
+            flash('Service temporarily unavailable. Please try again in a moment.', 'danger')
+            return render_template('register.html'), 503
 
         if existing_user:
             flash('User already exists! Please login.', 'warning')
@@ -86,7 +126,9 @@ def register():
 
         # Insert new user into the credentials table
         cur.execute("INSERT INTO credentials (username, password) VALUES (%s, %s)", (username, hashed_password))
-        mysql.connection.commit()
+        conn.commit()
+        cur.close()
+        conn.close()
 
         # Automatically log in the user after registration
         session['username'] = username  # Store session data
@@ -102,9 +144,16 @@ def check_username():
     data = request.get_json()
     username = data.get('username')
 
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM credentials WHERE username = %s", (username,))
-    existing_user = cur.fetchone()
+    try:
+        conn = _get_db()
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM credentials WHERE username = %s", (username,))
+        existing_user = cur.fetchone()
+        cur.close()
+        conn.close()
+    except Exception:
+        app.logger.exception("Username check failed due to database connection error")
+        return jsonify({'exists': False, 'error': 'service_unavailable'}), 503
     
     return jsonify({'exists': bool(existing_user)})  # Returns True if user exists, False otherwise
 
@@ -118,7 +167,8 @@ def logout():
 def index():
     username = session.get('username')  # Get the logged-in username
 
-    cur = mysql.connection.cursor()
+    conn = _get_db()
+    cur = conn.cursor()
     current_month = datetime.now().strftime('%Y-%m')
     current_month_name = datetime.now().strftime('%B %Y')  # "January 2025"
 
@@ -133,9 +183,12 @@ def index():
         expenses = cur.fetchall()
         total = sum(expense['amount'] for expense in expenses)
         cur.close()
+        conn.close()
         return render_template('index.html', expenses=expenses, total=total, current_month_name=current_month_name)
     else:
         flash('User not found!', 'danger')
+        cur.close()
+        conn.close()
         return redirect(url_for('login'))
 
 @app.route('/add', methods=['POST'])
@@ -147,7 +200,8 @@ def add_expense():
     username = session.get('username')  # Get the logged-in username
 
     # Get the user_id from the credentials table
-    cur = mysql.connection.cursor()
+    conn = _get_db()
+    cur = conn.cursor()
     cur.execute("SELECT id FROM credentials WHERE username = %s", [username])
     user = cur.fetchone()
 
@@ -155,19 +209,24 @@ def add_expense():
         user_id = user['id']
         cur.execute("INSERT INTO expenses (date, type, amount, user_id) VALUES (%s, %s, %s, %s)", 
                     (date, type, amount, user_id))
-        mysql.connection.commit()
+        conn.commit()
         cur.close()
+        conn.close()
         return jsonify(success=True)
     else:
+        cur.close()
+        conn.close()
         return jsonify(error="User not found"), 404
 
 @app.route('/delete/<int:id>', methods=['DELETE'])
 def delete_expense(id):
     try:
-        cursor = mysql.connection.cursor()
+        conn = _get_db()
+        cursor = conn.cursor()
         cursor.execute("DELETE FROM expenses WHERE id = %s", (id,))
-        mysql.connection.commit()
+        conn.commit()
         cursor.close()
+        conn.close()
         
         return jsonify({"success": True}), 200  # Ensure JSON response with 200 status
     except Exception as e:
@@ -187,7 +246,8 @@ def visualize():
         year = datetime.now().year
         search_query = ''
 
-    cur = mysql.connection.cursor()
+    conn = _get_db()
+    cur = conn.cursor()
 
     # Get user_id from the credentials table
     cur.execute("SELECT id FROM credentials WHERE username = %s", [username])
@@ -222,6 +282,7 @@ def visualize():
         total_spent = sum(expense_data)  # Calculate total amount spent
 
         cur.close()
+        conn.close()
 
         if request.method == 'POST':
             return jsonify(months=months, expense_data=expense_data, total_spent=total_spent)
@@ -229,13 +290,16 @@ def visualize():
             return render_template('visualize.html', months=months, expense_data=expense_data, year=year, total_spent=total_spent)
     else:
         flash('User not found!', 'danger')
+        cur.close()
+        conn.close()
         return redirect(url_for('login'))
 
 
 @app.route('/reports', methods=['GET', 'POST'])
 def filter_expenses():
     username = session.get('username')  # Get the logged-in username
-    cur = mysql.connection.cursor()
+    conn = _get_db()
+    cur = conn.cursor()
 
     # Get user_id from the credentials table
     cur.execute("SELECT id FROM credentials WHERE username = %s", [username])
@@ -272,6 +336,7 @@ def filter_expenses():
 
         # Close the cursor
         cur.close()
+        conn.close()
 
         # Return the rendered template with total added to the context
         return render_template(
@@ -285,6 +350,8 @@ def filter_expenses():
         )
     else:
         flash('User not found!', 'danger')
+        cur.close()
+        conn.close()
         return redirect(url_for('login'))
     
 

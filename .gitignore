@@ -7,3 +7,5 @@ env/
 node_modules/
 *.sqlite3
 .env
+database.txt
+Backup

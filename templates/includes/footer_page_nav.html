@@ -1,0 +1,13 @@
+{# Set fp_nav_active to: about | contact | privacy | terms before including #}
+<header class="fp-header">
+    <div class="fp-header-inner">
+        <a class="fp-brand" href="{{ url_for('landing') }}">Tracklio</a>
+        <nav class="fp-nav" aria-label="Site pages">
+            <a href="{{ url_for('landing') }}">Home</a>
+            <a href="{{ url_for('about') }}" {% if fp_nav_active == 'about' %}aria-current="page"{% endif %}>About</a>
+            <a href="{{ url_for('contact') }}" {% if fp_nav_active == 'contact' %}aria-current="page"{% endif %}>Contact</a>
+            <a href="{{ url_for('privacy_policy') }}" {% if fp_nav_active == 'privacy' %}aria-current="page"{% endif %}>Privacy</a>
+            <a href="{{ url_for('termsofservice') }}" {% if fp_nav_active == 'terms' %}aria-current="page"{% endif %}>Terms</a>
+        </nav>
+    </div>
+</header>
