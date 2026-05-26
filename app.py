@@ -93,7 +93,7 @@ def login():
             if bcrypt.checkpw(password.encode('utf-8'), bytes(stored_password)):
                 # If the password is correct, log in the user
                 session['username'] = username
-                return redirect(url_for('index'))  # Redirect to the index page after successful login
+                return redirect(url_for('visualize'))  # Redirect to the visualize dashboard after successful login
             else:
                 flash('Invalid password!', 'danger')
         else:
@@ -134,7 +134,7 @@ def register():
         session['username'] = username  # Store session data
         # flash('Registration successful! You are now logged in.', 'success')
 
-        return redirect(url_for('index'))  # Redirect to index.html after successful registration
+        return redirect(url_for('visualize'))  # Redirect to visualize dashboard after successful registration
 
     return render_template('register.html')
 
@@ -165,31 +165,7 @@ def logout():
 
 @app.route('/index')
 def index():
-    username = session.get('username')  # Get the logged-in username
-
-    conn = _get_db()
-    cur = conn.cursor()
-    current_month = datetime.now().strftime('%Y-%m')
-    current_month_name = datetime.now().strftime('%B %Y')  # "January 2025"
-
-    # Get user_id from the credentials table
-    cur.execute("SELECT id FROM credentials WHERE username = %s", [username])
-    user = cur.fetchone()
-
-    if user:
-        user_id = user['id']
-        query = "SELECT * FROM expenses WHERE DATE_FORMAT(date, '%%Y-%%m') = %s AND user_id = %s"
-        cur.execute(query, (current_month, user_id))
-        expenses = cur.fetchall()
-        total = sum(expense['amount'] for expense in expenses)
-        cur.close()
-        conn.close()
-        return render_template('index.html', expenses=expenses, total=total, current_month_name=current_month_name)
-    else:
-        flash('User not found!', 'danger')
-        cur.close()
-        conn.close()
-        return redirect(url_for('login'))
+    return redirect(url_for('visualize'))
 
 @app.route('/add', methods=['POST'])
 def add_expense():
@@ -238,121 +214,304 @@ def delete_expense(id):
 @app.route('/visualize', methods=['GET', 'POST'])
 def visualize():
     username = session.get('username')  # Get the logged-in username
+    if not username:
+        return redirect(url_for('login'))
+
     if request.method == 'POST':
-        data = request.get_json()
-        year = int(data['year'])
-        search_query = data.get('search_query', '')  # Get the search query if provided
-    else:
-        year = datetime.now().year
-        search_query = ''
+        try:
+            data = request.get_json() or {}
+            month_year = data.get('month_year')
+            search_query = data.get('search_query', '').strip()
+        except Exception:
+            month_year = None
+            search_query = ''
 
-    conn = _get_db()
-    cur = conn.cursor()
+        if month_year:
+            try:
+                year, month = map(int, month_year.split('-'))
+            except Exception:
+                now = datetime.now()
+                year = now.year
+                month = now.month
+        else:
+            now = datetime.now()
+            year = now.year
+            month = now.month
 
-    # Get user_id from the credentials table
-    cur.execute("SELECT id FROM credentials WHERE username = %s", [username])
-    user = cur.fetchone()
+        import calendar
+        days_in_month = calendar.monthrange(year, month)[1]
 
-    if user:
+        conn = _get_db()
+        cur = conn.cursor()
+
+        # Get user_id from the credentials table
+        cur.execute("SELECT id FROM credentials WHERE username = %s", [username])
+        user = cur.fetchone()
+
+        if not user:
+            cur.close()
+            conn.close()
+            return jsonify(error="User not found"), 404
+
         user_id = user['id']
-        # Fetch expenses for each month of the selected year
-        query = """
-            SELECT MONTH(date) AS month, SUM(amount) AS total_expenses
-            FROM expenses
+
+        # 1. Total spent in this month
+        total_query = """
+            SELECT SUM(amount) AS total 
+            FROM expenses 
+            WHERE YEAR(date) = %s AND MONTH(date) = %s AND user_id = %s
+        """
+        params = [year, month, user_id]
+        if search_query:
+            total_query += " AND type LIKE %s"
+            params.append('%' + search_query + '%')
+        
+        cur.execute(total_query, params)
+        total_res = cur.fetchone()
+        total_spent = float(total_res['total']) if total_res and total_res['total'] is not None else 0.0
+
+        # 2. Total transactions
+        count_query = """
+            SELECT COUNT(*) AS count 
+            FROM expenses 
+            WHERE YEAR(date) = %s AND MONTH(date) = %s AND user_id = %s
+        """
+        params = [year, month, user_id]
+        if search_query:
+            count_query += " AND type LIKE %s"
+            params.append('%' + search_query + '%')
+        
+        cur.execute(count_query, params)
+        count_res = cur.fetchone()
+        transaction_count = count_res['count'] if count_res else 0
+
+        # 3. Average spending per day
+        avg_per_day = round(total_spent / days_in_month, 2)
+
+        # 4. Peak day
+        peak_query = """
+            SELECT DAY(date) AS day, SUM(amount) AS total 
+            FROM expenses 
+            WHERE YEAR(date) = %s AND MONTH(date) = %s AND user_id = %s
+        """
+        params = [year, month, user_id]
+        if search_query:
+            peak_query += " AND type LIKE %s"
+            params.append('%' + search_query + '%')
+        peak_query += " GROUP BY DAY(date) ORDER BY total DESC LIMIT 1"
+        
+        cur.execute(peak_query, params)
+        peak_res = cur.fetchone()
+        peak_day_num = peak_res['day'] if peak_res else "N/A"
+        peak_day_amount = float(peak_res['total']) if peak_res else 0.0
+
+        # 5. Daily spend trend (day-by-day totals)
+        daily_query = """
+            SELECT DAY(date) AS day, SUM(amount) AS total 
+            FROM expenses 
+            WHERE YEAR(date) = %s AND MONTH(date) = %s AND user_id = %s
+        """
+        params = [year, month, user_id]
+        if search_query:
+            daily_query += " AND type LIKE %s"
+            params.append('%' + search_query + '%')
+        daily_query += " GROUP BY DAY(date)"
+        
+        cur.execute(daily_query, params)
+        daily_res = cur.fetchall()
+        daily_dict = {row['day']: float(row['total']) for row in daily_res}
+        
+        daily_days = list(range(1, days_in_month + 1))
+        daily_totals = [daily_dict.get(day, 0.0) for day in daily_days]
+
+        # 6. Top Items / Categories (Donut chart data)
+        cat_query = """
+            SELECT type, SUM(amount) AS total 
+            FROM expenses 
+            WHERE YEAR(date) = %s AND MONTH(date) = %s AND user_id = %s
+        """
+        params = [year, month, user_id]
+        if search_query:
+            cat_query += " AND type LIKE %s"
+            params.append('%' + search_query + '%')
+        cat_query += " GROUP BY type ORDER BY total DESC"
+        
+        cur.execute(cat_query, params)
+        cat_res = cur.fetchall()
+        
+        categories = []
+        category_totals = []
+        category_percentages = []
+        
+        if cat_res:
+            sorted_cats = [{ 'name': row['type'], 'total': float(row['total']) } for row in cat_res]
+            if len(sorted_cats) > 4:
+                top_cats = sorted_cats[:3]
+                other_sum = sum(item['total'] for item in sorted_cats[3:])
+                top_cats.append({ 'name': 'Other', 'total': other_sum })
+            else:
+                top_cats = sorted_cats
+                
+            for item in top_cats:
+                categories.append(item['name'])
+                category_totals.append(item['total'])
+                percentage = round((item['total'] / total_spent) * 100, 1) if total_spent > 0 else 0
+                category_percentages.append(percentage)
+
+        # 7. Monthly spending for the selected year
+        year_query = """
+            SELECT MONTH(date) AS month, SUM(amount) AS total 
+            FROM expenses 
             WHERE YEAR(date) = %s AND user_id = %s
         """
         params = [year, user_id]
-
-        # Add search query to filter by item name
         if search_query:
-            query += " AND type LIKE %s"
+            year_query += " AND type LIKE %s"
             params.append('%' + search_query + '%')
-
-        query += " GROUP BY MONTH(date)"
-        cur.execute(query, params)
-        monthly_expenses = cur.fetchall()
-
-        # Prepare data for visualization
-        months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-        expense_data = [0] * 12  # Default values for all months
-
-        for expense in monthly_expenses:
-            expense_data[expense['month'] - 1] = expense['total_expenses']
-
-        total_spent = sum(expense_data)  # Calculate total amount spent
-
-        cur.close()
-        conn.close()
-
-        if request.method == 'POST':
-            return jsonify(months=months, expense_data=expense_data, total_spent=total_spent)
+        year_query += " GROUP BY MONTH(date)"
+        
+        cur.execute(year_query, params)
+        year_res = cur.fetchall()
+        year_dict = {row['month']: float(row['total']) for row in year_res}
+        
+        months_names = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+        monthly_totals = [year_dict.get(m, 0.0) for m in range(1, 13)]
+        yearly_total = sum(monthly_totals)
+        
+        # Highlight highest spending month
+        max_spent = max(monthly_totals) if monthly_totals else 0
+        if max_spent > 0:
+            highest_month_idx = monthly_totals.index(max_spent)
+            highest_month_name = months_names[highest_month_idx]
         else:
-            return render_template('visualize.html', months=months, expense_data=expense_data, year=year, total_spent=total_spent)
-    else:
-        flash('User not found!', 'danger')
+            highest_month_name = "N/A"
+            
+        # Percentage change compared to previous month
+        selected_month_total = monthly_totals[month - 1]
+        prev_month_total = monthly_totals[month - 2] if month > 1 else 0.0
+        
+        if prev_month_total > 0:
+            percentage_change = round(((selected_month_total - prev_month_total) / prev_month_total) * 100)
+        else:
+            percentage_change = 100 if selected_month_total > 0 else 0
+
+        # 8. Smart Insights
+        # 8.1. Top Category
+        top_category_name = categories[0] if categories else "N/A"
+        top_category_amount = category_totals[0] if category_totals else 0.0
+        top_category_percentage = category_percentages[0] if category_percentages else 0.0
+        
+        # 8.2. Highest Spending Day
+        # Already have peak_day_num and peak_day_amount
+        
+        # 8.3. Most Frequent Expense Item
+        freq_query = """
+            SELECT type, COUNT(*) AS count 
+            FROM expenses 
+            WHERE YEAR(date) = %s AND MONTH(date) = %s AND user_id = %s
+        """
+        params = [year, month, user_id]
+        if search_query:
+            freq_query += " AND type LIKE %s"
+            params.append('%' + search_query + '%')
+        freq_query += " GROUP BY type ORDER BY count DESC LIMIT 1"
+        
+        cur.execute(freq_query, params)
+        freq_res = cur.fetchone()
+        frequent_item_name = freq_res['type'] if freq_res else "N/A"
+        frequent_item_count = freq_res['count'] if freq_res else 0
+
+        # 8.4. Weekday vs Weekend split
+        pattern_query = """
+            SELECT 
+                SUM(CASE WHEN DAYOFWEEK(date) IN (1, 7) THEN amount ELSE 0 END) AS weekend_spent,
+                SUM(CASE WHEN DAYOFWEEK(date) IN (2, 3, 4, 5, 6) THEN amount ELSE 0 END) AS weekday_spent
+            FROM expenses
+            WHERE YEAR(date) = %s AND MONTH(date) = %s AND user_id = %s
+        """
+        params = [year, month, user_id]
+        if search_query:
+            pattern_query += " AND type LIKE %s"
+            params.append('%' + search_query + '%')
+            
+        cur.execute(pattern_query, params)
+        pattern_res = cur.fetchone()
+        
+        weekend_spent = float(pattern_res['weekend_spent']) if pattern_res and pattern_res['weekend_spent'] is not None else 0.0
+        weekday_spent = float(pattern_res['weekday_spent']) if pattern_res and pattern_res['weekday_spent'] is not None else 0.0
+        total_pattern = weekend_spent + weekday_spent
+        
+        if total_pattern > 0:
+            weekday_percentage = round((weekday_spent / total_pattern) * 100)
+            weekend_percentage = round((weekend_spent / total_pattern) * 100)
+        else:
+            weekday_percentage = 0
+            weekend_percentage = 0
+
+        # 9. List of expenses for table
+        list_query = """
+            SELECT id, DATE_FORMAT(date, '%%Y-%%m-%%d') AS date, type, amount 
+            FROM expenses 
+            WHERE YEAR(date) = %s AND MONTH(date) = %s AND user_id = %s
+        """
+        params = [year, month, user_id]
+        if search_query:
+            list_query += " AND type LIKE %s"
+            params.append('%' + search_query + '%')
+        list_query += " ORDER BY date ASC"
+        
+        cur.execute(list_query, params)
+        expenses_res = cur.fetchall()
+        
+        expenses_list = []
+        for row in expenses_res:
+            expenses_list.append({
+                'id': row['id'],
+                'date': row['date'],
+                'type': row['type'],
+                'amount': float(row['amount'])
+            })
+
         cur.close()
         conn.close()
-        return redirect(url_for('login'))
+
+        return jsonify(
+            success=True,
+            total_spent=total_spent,
+            transaction_count=transaction_count,
+            avg_per_day=avg_per_day,
+            peak_day_num=peak_day_num,
+            peak_day_amount=peak_day_amount,
+            daily_days=daily_days,
+            daily_totals=daily_totals,
+            categories=categories,
+            category_totals=category_totals,
+            category_percentages=category_percentages,
+            months_names=months_names,
+            monthly_totals=monthly_totals,
+            yearly_total=yearly_total,
+            highest_month_name=highest_month_name,
+            percentage_change=percentage_change,
+            top_category_name=top_category_name,
+            top_category_amount=top_category_amount,
+            top_category_percentage=top_category_percentage,
+            frequent_item_name=frequent_item_name,
+            frequent_item_count=frequent_item_count,
+            weekday_percentage=weekday_percentage,
+            weekend_percentage=weekend_percentage,
+            expenses=expenses_list
+        )
+
+    else:
+        # GET request returns the main view template
+        now = datetime.now()
+        current_month_year = now.strftime('%Y-%m')
+        return render_template('visualize.html', current_month_year=current_month_year)
 
 
 @app.route('/reports', methods=['GET', 'POST'])
 def filter_expenses():
-    username = session.get('username')  # Get the logged-in username
-    conn = _get_db()
-    cur = conn.cursor()
-
-    # Get user_id from the credentials table
-    cur.execute("SELECT id FROM credentials WHERE username = %s", [username])
-    user = cur.fetchone()
-
-    if user:
-        user_id = user['id']
-
-        # Get the current year and all available years in the database
-        cur.execute("SELECT DISTINCT YEAR(date) FROM expenses WHERE user_id = %s ORDER BY YEAR(date) DESC", [user_id])
-        years = [row['YEAR(date)'] for row in cur.fetchall()]
-
-        # Default to the current month and year if no filter is applied
-        selected_year = int(request.form.get('year', datetime.now().year))
-        selected_month = int(request.form.get('month', datetime.now().month))
-
-        # Query to filter expenses based on selected year and month
-        query = """
-        SELECT * FROM expenses
-        WHERE YEAR(date) = %s AND MONTH(date) = %s AND user_id = %s
-        ORDER BY date ASC
-        """
-        cur.execute(query, (selected_year, selected_month, user_id))
-        expenses = cur.fetchall()
-
-        # Calculate total expenses for the selected month and year
-        total = sum(expense['amount'] for expense in expenses)
-
-        # Mapping of month numbers to month names
-        months = {
-            1: "January", 2: "February", 3: "March", 4: "April", 5: "May", 6: "June",
-            7: "July", 8: "August", 9: "September", 10: "October", 11: "November", 12: "December"
-        }
-
-        # Close the cursor
-        cur.close()
-        conn.close()
-
-        # Return the rendered template with total added to the context
-        return render_template(
-            'reports.html', 
-            expenses=expenses, 
-            years=years,
-            months=months,
-            selected_year=selected_year,
-            selected_month=selected_month,
-            total=total  # Pass total expense for the selected month to the template
-        )
-    else:
-        flash('User not found!', 'danger')
-        cur.close()
-        conn.close()
-        return redirect(url_for('login'))
+    return redirect(url_for('visualize'))
     
 
 @app.route('/footer/privacy_policy')
