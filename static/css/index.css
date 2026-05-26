@@ -1,7 +1,91 @@
+:root {
+  --bg-color: #f4f4f4;
+  --header-bg: #ffffff;
+  --header-text: #333333;
+  --header-shadow: rgba(0, 0, 0, 0.1);
+  --brand-color: #008080;
+  --nav-link-hover: #008080;
+  --container-bg: #ffffff;
+  --container-shadow: rgba(0, 0, 0, 0.1);
+  --text-color: #333333;
+  --border-color: #ddd;
+  --table-even-bg: #f2f2f2;
+}
+
+html.dark {
+  --bg-color: #0f172a;
+  --header-bg: #1e293b;
+  --header-text: #f1f5f9;
+  --header-shadow: rgba(0, 0, 0, 0.3);
+  --brand-color: #2dd4bf;
+  --nav-link-hover: #2dd4bf;
+  --container-bg: #1e293b;
+  --container-shadow: rgba(0, 0, 0, 0.3);
+  --text-color: #f1f5f9;
+  --border-color: #334155;
+  --table-even-bg: #1e293b;
+}
+
+/* Theme Toggle Button Styles */
+.theme-toggle-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--header-text);
+  transition: background-color 0.2s, transform 0.2s;
+  outline: none;
+}
+
+.theme-toggle-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  transform: rotate(15deg);
+}
+
+html.dark .theme-toggle-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.theme-toggle-btn .sun-icon {
+  display: none;
+}
+
+.theme-toggle-btn .moon-icon {
+  display: block;
+}
+
+html.dark .theme-toggle-btn .sun-icon {
+  display: block;
+  color: #fbbf24;
+}
+
+html.dark .theme-toggle-btn .moon-icon {
+  display: none;
+}
+
+/* Floating theme toggle for login/register */
+.theme-toggle-float {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 1000;
+  background: var(--container-bg);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 12px var(--container-shadow);
+  padding: 10px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
 /* General Styles */
 body {
   font-family: Arial, sans-serif; /* Replace with the exact font if specified */
-  background-color: #f4f4f4;
+  background-color: var(--bg-color);
+  color: var(--text-color);
   margin: 0;
   padding: 0;
   display: flex;
@@ -13,10 +97,10 @@ body {
 /* Header Styling */
 header {
   width: 100%;
-  background: #ffffff; /* White background */
-  color: #333333; /* Dark text */
+  background: var(--header-bg); /* White background */
+  color: var(--header-text); /* Dark text */
   padding: 10px 0; /* Adjust padding for spacing */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px var(--header-shadow);
   position: fixed;
   top: 0;
   z-index: 999;
@@ -45,12 +129,13 @@ header {
 .brand-name {
   font-size: 1.8rem; /* Match the font size in the PDF */
   font-weight: bold;
-  color: #008080; /* Teal color for the brand name */
+  color: var(--brand-color); /* Teal color for the brand name */
 }
 
 .nav-links ul {
   list-style: none;
   display: flex;
+  align-items: center;
   margin: 0;
   padding: 0;
 }
@@ -60,18 +145,18 @@ header {
 }
 
 .nav-links a {
-  color: #333333; /* Dark text for links */
+  color: var(--header-text); /* Dark text for links */
   text-decoration: none;
   font-weight: 500;
   transition: color 0.3s ease;
 }
 
 .nav-links a:hover {
-  color: #008080; /* Teal hover effect */
+  color: var(--nav-link-hover); /* Teal hover effect */
 }
 
 .btn-get-started {
-  background-color: #008080; /* Teal background */
+  background-color: var(--brand-color); /* Teal background */
   color: white; /* White text */
   padding: 10px 20px;
   border-radius: 25px; /* Rounded corners */
@@ -90,15 +175,15 @@ header {
   font-size: 1.5rem;
   background: none;
   border: none;
-  color: #333333;
+  color: var(--header-text);
   cursor: pointer;
 }
 
 /* Mobile Navigation */
 .mobile-nav {
   display: none;
-  background: #ffffff;
-  color: #333333;
+  background: var(--header-bg);
+  color: var(--header-text);
   text-align: center;
   padding: 10px 0;
 }
@@ -114,14 +199,14 @@ header {
 }
 
 .mobile-nav a {
-  color: #333333;
+  color: var(--header-text);
   text-decoration: none;
   font-weight: 500;
   transition: color 0.3s ease;
 }
 
 .mobile-nav a:hover {
-  color: #008080;
+  color: var(--nav-link-hover);
 }
 
 .mobile-nav .btn-get-started {
@@ -145,10 +230,10 @@ header {
 }
 
 .container {
-  background-color: #fff;
+  background-color: var(--container-bg);
   padding: 20px;
   border-radius: 12px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px var(--container-shadow);
   width: 90%;
   max-width: 1500px;
   margin-top: 90px;
@@ -157,7 +242,7 @@ header {
 h1 {
   text-align: center;
   margin-bottom: 20px;
-  color: #008080;
+  color: var(--brand-color);
 }
 
 .content-wrapper {
@@ -172,10 +257,10 @@ h1 {
 .form-container {
   flex: 1;
   max-width: 650px;
-  background-color: #fff;
+  background-color: var(--container-bg);
   padding: 30px;
   border-radius: 12px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Added top shadow and depth */
+  box-shadow: 0 8px 16px var(--container-shadow); /* Added top shadow and depth */
   margin: auto;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
@@ -193,14 +278,16 @@ form {
 
 label {
   font-size: 14px;
-  color: #555;
+  color: var(--text-color);
   margin-bottom: 5px;
 }
 
 input {
   padding: 12px;
   font-size: 16px;
-  border: 1px solid #ccc;
+  background-color: var(--header-bg);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   transition: all 0.3s ease;
 }
@@ -252,11 +339,11 @@ button:active {
 
 .expenses-container {
   flex: 2;
-  background-color: #fff;
+  background-color: var(--container-bg);
   margin-top: 80px;
   padding: 20px;
   border-radius: 12px;
-  box-shadow: 2px 4px 40px rgba(0, 0, 0, 0.1);
+  box-shadow: 2px 4px 40px var(--container-shadow);
   max-height: none; /* Removed scrolling effect */
 }
 
@@ -273,15 +360,17 @@ table {
 th, td {
   padding: 10px;
   text-align: center; /* Center align the table headers */
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-color);
 }
 
 th {
-  background-color: #f8f9fa;
+  background-color: var(--bg-color);
+  color: var(--text-color);
 }
 
 tr:nth-child(even) {
-  background-color: #f2f2f2;
+  background-color: var(--table-even-bg);
 }
 
 #totalAmount {
