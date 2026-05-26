@@ -1,233 +1,1367 @@
 {% extends "base.html" %}
 
-{% block title %}Visualize Your Expenses - Gain Insights into Your Spending Habits{% endblock %}
+{% block title %}Advanced Expense Analytics - Tracklio{% endblock %}
 
 {% block content %}
-<div class="container">
-  <!-- Heading -->
-  <h1 class="text-center">Expense Visualization for <span id="displayYear">{{ year }}</span></h1>
-  <p class="text-center text-muted">Analyze your monthly expenses using this interactive chart</p>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <!-- Year and Search Query Form -->
-<div class="form-container">
-  <form id="yearSelectionForm" class="year-selection-form">
-    <div class="form-group">
-      <!-- Year Dropdown -->
-      <label for="year" class="form-label">Select Year:</label>
-      <select name="year" id="year" class="form-select">
-        {% for y in range(2022, 2026) %}
-          <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
-        {% endfor %}
-      </select>
+<!-- Dashboard Wrapper -->
+<div class="dashboard-wrapper">
+  
+  <!-- Top Header Section -->
+  <div class="dashboard-header">
+    <div class="header-left">
+      <span class="sub-badge">OVERVIEW</span>
+      <h1>Advanced Expense Analytics</h1>
+      <p class="subtitle-text">Add expenses and review insights for a single month.</p>
     </div>
-    <div class="form-group">
-      <!-- Search Query Input -->
-      <label for="searchQuery" class="form-label">Search Item (optional):</label>
-      <input type="text" id="searchQuery" class="form-control" placeholder="Search for an item (e.g., Milk)" />
+    <div class="header-right">
+      <div class="filter-group">
+        <label for="monthSelector">Month</label>
+        <div class="input-wrapper">
+          <input type="month" id="monthSelector" value="{{ current_month_year }}">
+          <i class="fa-regular fa-calendar-days"></i>
+        </div>
+      </div>
+      <div class="filter-group search-group">
+        <label for="dashboardSearch">Search</label>
+        <div class="input-wrapper">
+          <input type="text" id="dashboardSearch" placeholder="Filter by item or amount...">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </div>
+      </div>
     </div>
-    <!-- View Data Button -->
-    <button type="submit" class="add_expense">Visualize</button>
-  </form>
+  </div>
+
+  <!-- KPI Cards Grid -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-meta">
+        <span class="kpi-label">Total spent</span>
+        <div class="kpi-icon teal-bg"><i class="fa-solid fa-wallet"></i></div>
+      </div>
+      <h2 id="kpiTotalSpent">₹0.00</h2>
+      <span class="kpi-context" id="kpiTotalSpentMonth">Loading...</span>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-meta">
+        <span class="kpi-label">Transactions</span>
+        <div class="kpi-icon teal-bg"><i class="fa-solid fa-receipt"></i></div>
+      </div>
+      <h2 id="kpiTransactions">0</h2>
+      <span class="kpi-context">This month</span>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-meta">
+        <span class="kpi-label">Avg / day</span>
+        <div class="kpi-icon orange-bg"><i class="fa-solid fa-chart-line-up"></i></div>
+      </div>
+      <h2 id="kpiAvgDay">₹0.00</h2>
+      <span class="kpi-context">Across the month</span>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-meta">
+        <span class="kpi-label">Peak day</span>
+        <div class="kpi-icon orange-bg"><i class="fa-solid fa-fire"></i></div>
+      </div>
+      <h2 id="kpiPeakDayAmount">₹0.00</h2>
+      <span class="kpi-context" id="kpiPeakDayNum">Loading...</span>
+    </div>
+  </div>
+
+  <!-- Main Grid Workspace -->
+  <div class="workspace-grid">
+    
+    <!-- Left Column: Add Expense & Donut Chart -->
+    <div class="workspace-left">
+      <!-- Add Expense Card -->
+      <div class="dash-card">
+        <div class="card-header">
+          <div>
+            <h3>Add expense</h3>
+            <p class="card-subtitle">Only 3 fields. Fast entry.</p>
+          </div>
+        </div>
+        <form id="dashExpenseForm" class="dash-form">
+          <div class="form-field">
+            <label for="expenseDate">Date</label>
+            <div class="input-wrapper">
+              <input type="date" id="expenseDate" required>
+            </div>
+          </div>
+          <div class="form-field">
+            <label for="expenseItem">Item</label>
+            <input type="text" id="expenseItem" placeholder="Enter item description" required>
+          </div>
+          <div class="form-field">
+            <label for="expenseAmount">Enter amount</label>
+            <input type="number" step="0.01" id="expenseAmount" placeholder="Enter amount" required>
+          </div>
+          <button type="submit" class="btn-primary">Add Expense</button>
+          <span class="form-disclaimer">Use this to input a new expense. Only today and previous dates allowed.</span>
+        </form>
+      </div>
+
+      <!-- Top Items Pie Chart -->
+      <div class="dash-card">
+        <div class="card-header">
+          <div>
+            <h3>Top Items</h3>
+            <p class="card-subtitle">Where most of the money goes</p>
+          </div>
+        </div>
+        <div class="donut-chart-container">
+          <canvas id="donutChart"></canvas>
+        </div>
+        <div class="custom-legend" id="donutLegend">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Line Chart, Bar Chart & Insights -->
+    <div class="workspace-right">
+      
+      <!-- Daily Spend Line Chart -->
+      <div class="dash-card trend-card">
+        <div class="card-header">
+          <div>
+            <h3>Daily spend trend</h3>
+            <p class="card-subtitle" id="dailyTrendSubtitle">Day by day total</p>
+          </div>
+        </div>
+        <div class="line-chart-container">
+          <canvas id="lineChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Section 1 & Section 2 row -->
+      <div class="insights-row">
+        
+        <!-- Section 1: Monthly Spending Bar Chart -->
+        <div class="dash-card bar-chart-card">
+          <div class="card-header row-card-header">
+            <div>
+              <h3 id="monthlySpendingTitle">Monthly Spending for 2026</h3>
+              <div class="trend-badge" id="monthlyTrendBadge">
+                <span class="trend-value" id="monthlyTrendVal">+0%</span>
+                <span class="trend-label">compared to last month</span>
+              </div>
+            </div>
+            <div class="yearly-summary">
+              <h2 id="yearlySpentVal">₹0.00</h2>
+              <p class="card-subtitle text-right">Total spent this year</p>
+            </div>
+          </div>
+          
+          <div class="bar-chart-container">
+            <canvas id="barChart"></canvas>
+          </div>
+          
+          <div class="bar-card-footer">
+            <div class="footer-insight-badge">
+              <i class="fa-solid fa-circle-info"></i>
+              <span id="highestMonthHighlight">Highest spending month January</span>
+            </div>
+            <div class="footer-total-caps">
+              <span class="label">Total spent</span>
+              <span class="val" id="footerYearlySpent">₹0.00</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: Smart Expense Insights -->
+        <div class="dash-card smart-insights-card">
+          <div class="card-header">
+            <div>
+              <h3>Smart Expense Insights</h3>
+              <p class="card-subtitle">AI powered spending analytics</p>
+            </div>
+          </div>
+          
+          <div class="insights-grid">
+            <!-- Insight 1 -->
+            <div class="insight-item">
+              <div class="insight-icon teal-light-bg">
+                <i class="fa-solid fa-tags"></i>
+              </div>
+              <div class="insight-content">
+                <span class="insight-label">Top Category</span>
+                <h4 id="insightTopCategory">Loading...</h4>
+                <p id="insightTopCategorySub" class="insight-sub">₹0 (0% of total)</p>
+              </div>
+            </div>
+
+            <!-- Insight 2 -->
+            <div class="insight-item">
+              <div class="insight-icon orange-light-bg">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+              </div>
+              <div class="insight-content">
+                <span class="insight-label">Unusual Spending</span>
+                <h4 id="insightUnusualSpending">Loading...</h4>
+                <p id="insightUnusualSpendingSub" class="insight-sub">Peak spend day</p>
+              </div>
+            </div>
+
+            <!-- Insight 3 -->
+            <div class="insight-item">
+              <div class="insight-icon teal-light-bg">
+                <i class="fa-solid fa-repeat"></i>
+              </div>
+              <div class="insight-content">
+                <span class="insight-label">Frequent Expense</span>
+                <h4 id="insightFrequentExpense">Loading...</h4>
+                <p id="insightFrequentExpenseSub" class="insight-sub">0 times</p>
+              </div>
+            </div>
+
+            <!-- Insight 4 -->
+            <div class="insight-item">
+              <div class="insight-icon orange-light-bg">
+                <i class="fa-solid fa-calendar-day"></i>
+              </div>
+              <div class="insight-content">
+                <span class="insight-label">Spending Pattern</span>
+                <h4 id="insightSpendingPattern">Loading...</h4>
+                <p class="insight-sub">Weekday vs Weekend</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Expenses Table -->
+  <div class="dash-card table-card">
+    <div class="card-header table-card-header">
+      <h3 id="tableTitle">Expenses for February 2026</h3>
+      <div class="table-total-badge">
+        Total: <span id="tableTotalSpent">₹0.00</span>
+      </div>
+    </div>
+    <div class="table-scroll-container">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Item</th>
+            <th>Price</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="expenseTableBody">
+          <!-- Populated dynamically -->
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
 
-<!-- Chart Container -->
-<div class="chart-container">
-  <canvas id="expenseChart" width="400" height="200"></canvas>
-</div>
+<!-- Dynamic alert container -->
+<div id="dashboardAlert" class="dash-alert"></div>
 
-<!-- Include Chart.js -->
+<!-- Chart.js and Dashboard Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-  const yearDropdown = document.getElementById('year');
-  const displayYear = document.getElementById('displayYear');
-  const yearSelectionForm = document.getElementById('yearSelectionForm');
-  const searchQueryInput = document.getElementById('searchQuery');
+  document.addEventListener('DOMContentLoaded', function () {
+    // Set default date input to today
+    const dateInput = document.getElementById('expenseDate');
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.value = today;
 
-  // Initialize the chart
-  const ctx = document.getElementById('expenseChart').getContext('2d');
-  const expenseChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: {{ months|tojson }},
-      datasets: [{
-        label: 'Monthly Expenses',
-        data: {{ expense_data|tojson }},
-        backgroundColor: 'rgba(54, 162, 235, 0.6)',
-        borderColor: 'rgba(54, 162, 235, 1)',
-        borderWidth: 1,
-      }],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        y: {
-          beginAtZero: true,
+    // References to DOM elements
+    const monthSelector = document.getElementById('monthSelector');
+    const dashboardSearch = document.getElementById('dashboardSearch');
+    const dashExpenseForm = document.getElementById('dashExpenseForm');
+
+    // Chart contexts
+    const donutCtx = document.getElementById('donutChart').getContext('2d');
+    const lineCtx = document.getElementById('lineChart').getContext('2d');
+    const barCtx = document.getElementById('barChart').getContext('2d');
+
+    // Initialize chart instances
+    let donutChart = new Chart(donutCtx, {
+      type: 'doughnut',
+      data: {
+        labels: [],
+        datasets: [{
+          data: [],
+          backgroundColor: ['#0d9488', '#f97316', '#8b5cf6', '#10b981', '#64748b'],
+          borderWidth: 2,
+          borderColor: '#ffffff'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
         },
+        cutout: '70%'
+      }
+    });
+
+    let lineChart = new Chart(lineCtx, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [{
+          label: 'Spending',
+          data: [],
+          borderColor: '#f97316',
+          borderWidth: 3,
+          backgroundColor: function(context) {
+            const chart = context.chart;
+            const {ctx, chartArea} = chart;
+            if (!chartArea) return null;
+            const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+            gradient.addColorStop(0, 'rgba(249, 115, 22, 0.2)');
+            gradient.addColorStop(1, 'rgba(249, 115, 22, 0.0)');
+            return gradient;
+          },
+          fill: true,
+          tension: 0.4,
+          pointRadius: 0,
+          pointHoverRadius: 6,
+          pointHoverBackgroundColor: '#f97316',
+          pointHoverBorderColor: '#ffffff',
+          pointHoverBorderWidth: 2
+        }]
       },
-    },
-  });
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: { font: { family: 'Outfit', size: 11 }, color: '#94a3b8' }
+          },
+          y: {
+            grid: { color: '#f1f5f9' },
+            ticks: { font: { family: 'Outfit', size: 11 }, color: '#94a3b8' }
+          }
+        }
+      }
+    });
 
-  // Handle form submission to dynamically fetch and update chart data
-  yearSelectionForm.addEventListener('submit', function (event) {
-    event.preventDefault(); // Prevent page reload
-
-    const selectedYear = yearDropdown.value;
-    const searchQuery = searchQueryInput.value.trim(); // Get the search query
-
-    displayYear.textContent = selectedYear;
-
-    fetchData(selectedYear, searchQuery);
-  });
-
-  // Fetch data for the selected year and optional search query
-  function fetchData(year, searchQuery = '') {
-    fetch('/visualize', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+    let barChart = new Chart(barCtx, {
+      type: 'bar',
+      data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        datasets: [{
+          data: [],
+          backgroundColor: [],
+          borderRadius: 6,
+          borderSkipped: false
+        }]
       },
-      body: JSON.stringify({ year: year, search_query: searchQuery }),
-    })
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: { font: { family: 'Outfit', size: 11 }, color: '#94a3b8' }
+          },
+          y: {
+            grid: { color: '#f1f5f9' },
+            ticks: { font: { family: 'Outfit', size: 11 }, color: '#94a3b8' }
+          }
+        }
+      }
+    });
+
+    // Helper: format money
+    function formatCurrency(amount) {
+      return '₹' + parseFloat(amount).toLocaleString('en-IN', {
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 1
+      });
+    }
+
+    // Helper: parse month selector name
+    function getMonthName(yearMonthStr) {
+      if(!yearMonthStr) return '';
+      const [year, month] = yearMonthStr.split('-');
+      const date = new Date(year, parseInt(month) - 1, 1);
+      return date.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+    }
+
+    // Main fetch and dashboard updater function
+    function updateDashboard() {
+      const monthYear = monthSelector.value;
+      const searchQuery = dashboardSearch.value.trim();
+      const selectedMonthInt = parseInt(monthYear.split('-')[1]);
+
+      fetch('/visualize', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ month_year: monthYear, search_query: searchQuery })
+      })
       .then(response => response.json())
       .then(data => {
-        // Update the chart with new data
-        expenseChart.data.labels = data.months;
-        expenseChart.data.datasets[0].data = data.expense_data;
-        expenseChart.update();
+        if (!data.success) {
+          showDashboardAlert(data.error || 'Failed to fetch dashboard data', 'error');
+          return;
+        }
+
+        const monthName = getMonthName(monthYear);
+
+        // Update KPIs
+        document.getElementById('kpiTotalSpent').textContent = formatCurrency(data.total_spent);
+        document.getElementById('kpiTotalSpentMonth').textContent = monthName;
+        document.getElementById('kpiTransactions').textContent = data.transaction_count;
+        document.getElementById('kpiAvgDay').textContent = formatCurrency(data.avg_per_day);
+        document.getElementById('kpiPeakDayAmount').textContent = formatCurrency(data.peak_day_amount);
+        
+        if (data.peak_day_num && data.peak_day_num !== "N/A") {
+          document.getElementById('kpiPeakDayNum').textContent = 'Day ' + data.peak_day_num;
+        } else {
+          document.getElementById('kpiPeakDayNum').textContent = 'No Peak Day';
+        }
+
+        // Update Line Chart (Daily trend)
+        document.getElementById('dailyTrendSubtitle').textContent = 'Day by day total for ' + monthName;
+        lineChart.data.labels = data.daily_days;
+        lineChart.data.datasets[0].data = data.daily_totals;
+        lineChart.update();
+
+        // Update Donut Chart (Top Items)
+        donutChart.data.labels = data.categories;
+        donutChart.data.datasets[0].data = data.category_totals;
+        donutChart.update();
+
+        // Render Custom Legend for Donut
+        const donutLegend = document.getElementById('donutLegend');
+        donutLegend.innerHTML = '';
+        if (data.categories.length > 0) {
+          const colors = donutChart.data.datasets[0].backgroundColor;
+          data.categories.forEach((cat, idx) => {
+            const legendItem = document.createElement('div');
+            legendItem.className = 'legend-item';
+            legendItem.innerHTML = `
+              <div class="legend-color" style="background-color: ${colors[idx % colors.length]}"></div>
+              <span class="legend-label">${cat}</span>
+              <span class="legend-percentage">${data.category_percentages[idx]}%</span>
+            `;
+            donutLegend.appendChild(legendItem);
+          });
+        } else {
+          donutLegend.innerHTML = '<div class="no-legend-data">No expense data in this month</div>';
+        }
+
+        // Update Bar Chart (Monthly overview YTD)
+        const [selYear, selMonth] = monthYear.split('-');
+        document.getElementById('monthlySpendingTitle').textContent = `Monthly Spending for ${selYear}`;
+        
+        barChart.data.datasets[0].data = data.monthly_totals;
+        
+        // Dynamically color completed/upcoming months
+        const barColors = [];
+        for (let i = 1; i <= 12; i++) {
+          if (i <= selectedMonthInt) {
+            barColors.push('#f97316'); // soft orange
+          } else {
+            barColors.push('#e2e8f0'); // greyed out
+          }
+        }
+        barChart.data.datasets[0].backgroundColor = barColors;
+        barChart.update();
+
+        // Update Bar Card header and footer info
+        document.getElementById('yearlySpentVal').textContent = formatCurrency(data.yearly_total);
+        document.getElementById('footerYearlySpent').textContent = formatCurrency(data.yearly_total);
+        
+        const trendBadge = document.getElementById('monthlyTrendBadge');
+        const trendVal = document.getElementById('monthlyTrendVal');
+        if (data.percentage_change >= 0) {
+          trendVal.textContent = `+${data.percentage_change}%`;
+          trendBadge.className = 'trend-badge trend-up';
+        } else {
+          trendVal.textContent = `${data.percentage_change}%`;
+          trendBadge.className = 'trend-badge trend-down';
+        }
+        
+        document.getElementById('highestMonthHighlight').textContent = `Highest spending month ${data.highest_month_name}`;
+
+        // Update Smart Insights
+        if (data.top_category_name && data.top_category_name !== "N/A") {
+          document.getElementById('insightTopCategory').textContent = data.top_category_name;
+          document.getElementById('insightTopCategorySub').textContent = `${formatCurrency(data.top_category_amount)} (${data.top_category_percentage}% of total)`;
+        } else {
+          document.getElementById('insightTopCategory').textContent = 'N/A';
+          document.getElementById('insightTopCategorySub').textContent = 'No category data';
+        }
+
+        if (data.peak_day_num && data.peak_day_num !== "N/A") {
+          document.getElementById('insightUnusualSpending').textContent = formatCurrency(data.peak_day_amount);
+          document.getElementById('insightUnusualSpendingSub').textContent = `On ${monthName.split(' ')[0]} ${data.peak_day_num}`;
+        } else {
+          document.getElementById('insightUnusualSpending').textContent = 'N/A';
+          document.getElementById('insightUnusualSpendingSub').textContent = 'No peak day';
+        }
+
+        if (data.frequent_item_name && data.frequent_item_name !== "N/A") {
+          document.getElementById('insightFrequentExpense').textContent = data.frequent_item_name;
+          document.getElementById('insightFrequentExpenseSub').textContent = `${data.frequent_item_count} times`;
+        } else {
+          document.getElementById('insightFrequentExpense').textContent = 'N/A';
+          document.getElementById('insightFrequentExpenseSub').textContent = '0 times';
+        }
+
+        if (data.total_spent > 0) {
+          document.getElementById('insightSpendingPattern').textContent = `Weekday: ${data.weekday_percentage}%`;
+          document.querySelector('#insightSpendingPattern + p').textContent = `Weekend: ${data.weekend_percentage}%`;
+        } else {
+          document.getElementById('insightSpendingPattern').textContent = 'N/A';
+          document.querySelector('#insightSpendingPattern + p').textContent = 'No pattern data';
+        }
+
+        // Update Expenses List Table
+        document.getElementById('tableTitle').textContent = `Expenses for ${monthName}`;
+        document.getElementById('tableTotalSpent').textContent = formatCurrency(data.total_spent);
+        
+        const tableBody = document.getElementById('expenseTableBody');
+        tableBody.innerHTML = '';
+        
+        if (data.expenses.length > 0) {
+          data.expenses.forEach(exp => {
+            const tr = document.createElement('tr');
+            tr.id = `expense-row-${exp.id}`;
+            tr.innerHTML = `
+              <td>${exp.date}</td>
+              <td class="text-left font-medium">${exp.type}</td>
+              <td class="price-val">₹${exp.amount.toFixed(2)}</td>
+              <td>
+                <button class="btn-delete-row" data-id="${exp.id}"><i class="fa-solid fa-trash-can"></i> Delete</button>
+              </td>
+            `;
+            tableBody.appendChild(tr);
+          });
+
+          // Bind delete events
+          document.querySelectorAll('.btn-delete-row').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+              e.preventDefault();
+              const expId = this.getAttribute('data-id');
+              deleteExpenseFromDashboard(expId);
+            });
+          });
+        } else {
+          tableBody.innerHTML = `
+            <tr>
+              <td colspan="4" class="empty-table-msg">
+                <i class="fa-regular fa-folder-open"></i>
+                <p>No expenses found in this month</p>
+              </td>
+            </tr>
+          `;
+        }
       })
-      .catch(error => console.error('Error:', error));
-  }
+      .catch(error => {
+        console.error('Error fetching dashboard:', error);
+        showDashboardAlert('Error connecting to the server', 'error');
+      });
+    }
 
-  // Initialize with the current year
-  fetchData({{ year }});
+    // Add new expense directly from the dashboard
+    dashExpenseForm.addEventListener('submit', function (e) {
+      e.preventDefault();
 
+      const date = document.getElementById('expenseDate').value;
+      const type = document.getElementById('expenseItem').value;
+      const amountField = document.getElementById('expenseAmount');
+      const amount = parseFloat(amountField.value);
+      const submitBtn = this.querySelector('button[type="submit"]');
 
-  const menuToggle = document.getElementById('menu-toggle');
-  const mobileMenu = document.getElementById('mobile-menu');
+      if (amount <= 0) {
+        showDashboardAlert('Amount must be greater than zero.', 'error');
+        amountField.value = '';
+        return;
+      }
 
-  menuToggle.addEventListener('click', () => {
-    mobileMenu.style.display = mobileMenu.style.display === 'block' ? 'none' : 'block';
+      submitBtn.disabled = true;
+      submitBtn.style.opacity = '0.7';
+
+      fetch('/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ date, type, amount }),
+      })
+      .then(response => response.json())
+      .then(data => {
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = '1';
+        
+        if (data.success) {
+          showDashboardAlert('Expense added successfully!', 'success');
+          // Reset form items
+          document.getElementById('expenseItem').value = '';
+          amountField.value = '';
+          // Refresh the dashboard data
+          updateDashboard();
+        } else {
+          showDashboardAlert('Failed to add expense.', 'error');
+        }
+      })
+      .catch(error => {
+        console.error('Error adding expense:', error);
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = '1';
+        showDashboardAlert('Error adding expense, please try again.', 'error');
+      });
+    });
+
+    // Delete expense from the dashboard
+    function deleteExpenseFromDashboard(id) {
+      if(!confirm("Are you sure you want to delete this expense?")) return;
+
+      fetch(`/delete/${id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          showDashboardAlert('Expense deleted successfully!', 'success');
+          // Refresh the dashboard
+          updateDashboard();
+        } else {
+          showDashboardAlert(data.error || 'Failed to delete expense!', 'error');
+        }
+      })
+      .catch(error => {
+        console.error('Error deleting expense:', error);
+        showDashboardAlert('Failed to delete expense, please try again.', 'error');
+      });
+    }
+
+    // Dashboard Alert notification handler
+    function showDashboardAlert(message, type) {
+      const alertBox = document.getElementById('dashboardAlert');
+      alertBox.textContent = message;
+      alertBox.className = 'dash-alert ' + type;
+      
+      // Slide and fade in
+      alertBox.style.transform = 'translateX(-50%) translateY(0)';
+      alertBox.style.opacity = '1';
+
+      setTimeout(() => {
+        // Slide and fade out
+        alertBox.style.transform = 'translateX(-50%) translateY(-20px)';
+        alertBox.style.opacity = '0';
+      }, 3000);
+    }
+
+    // Event listeners for month selector and search query
+    monthSelector.addEventListener('change', updateDashboard);
+    
+    let searchTimeout;
+    dashboardSearch.addEventListener('input', function() {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(updateDashboard, 400); // Debounce searches
+    });
+
+    // Run first initialization load
+    updateDashboard();
   });
-
-
 </script>
 
 <style>
-  /* General Styles */
-body {
-  font-family: Arial, sans-serif;
-  background-color: #f4f4f4;
-  margin: 0;
-  padding: 0;
-}
-
+/* CSS Reset and Sandbox-Safe Styling overrides */
 .container {
-  max-width: 1500px; /* Maximum width for larger screens */
-  width: 95%; /* Use percentage-based width for responsiveness */
-  margin: 0 auto; /* Center the container horizontally */
-  padding: 20px; /* Default padding for larger screens */
-  background-color: #ffffff;
-  border-radius: 8px;
-  margin-top: 40px; /* Default top margin for larger screens */
-  box-sizing: border-box; /* Ensure padding and borders are included in the width */
+  background-color: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  width: 96% !important;
+  max-width: 1550px !important;
+  margin-top: 85px !important;
 }
 
-.text-center {
+.dashboard-wrapper {
+  font-family: 'Outfit', sans-serif;
+  color: #0f172a;
+  background-color: #f8fafc;
+  min-height: 100vh;
+  padding-bottom: 50px;
+}
+
+/* Header design */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 24px;
+  padding: 10px 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.header-left .sub-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #f97316; /* Soft Orange */
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.header-left h1 {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: #0f172a;
+  text-align: left;
+  margin: 4px 0 6px 0;
+}
+
+.header-left .subtitle-text {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.header-right {
+  display: flex;
+  gap: 16px;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.filter-group label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-wrapper input {
+  padding: 9px 12px;
+  padding-right: 36px;
+  font-size: 0.9rem;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 500;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: #0f172a;
+  width: 175px;
+  box-sizing: border-box;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+  transition: all 0.2s ease;
+}
+
+.input-wrapper input:focus {
+  border-color: #0d9488; /* Teal */
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+  outline: none;
+}
+
+.input-wrapper i {
+  position: absolute;
+  right: 12px;
+  color: #94a3b8;
+  font-size: 0.95rem;
+}
+
+.search-group .input-wrapper input {
+  width: 250px;
+}
+
+/* KPI Cards Layout */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.kpi-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+  border: 1px solid #f1f5f9;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+}
+
+.kpi-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.kpi-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.kpi-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.teal-bg {
+  background-color: #f0fdfa;
+  color: #0d9488;
+}
+
+.orange-bg {
+  background-color: #fff7ed;
+  color: #f97316;
+}
+
+.kpi-card h2 {
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.02em;
+}
+
+.kpi-context {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+/* Dashboard general card */
+.dash-card {
+  background-color: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.02);
+  padding: 24px;
+  margin-bottom: 24px;
+  box-sizing: border-box;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.card-header h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 4px 0;
+}
+
+.card-subtitle {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Two column workspace grid */
+.workspace-grid {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+/* Form Styles */
+.dash-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-field label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.form-field input {
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  font-family: 'Outfit', sans-serif;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-field input:focus {
+  border-color: #0d9488;
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+  outline: none;
+}
+
+.btn-primary {
+  background-color: #0d9488; /* Teal */
+  color: #ffffff;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(13, 148, 136, 0.15);
+}
+
+.btn-primary:hover {
+  background-color: #0f766e;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(13, 148, 136, 0.2);
+}
+
+.btn-primary:active {
+  transform: translateY(1px);
+}
+
+.form-disclaimer {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  text-align: center;
+  line-height: 1.4;
+  margin-top: 4px;
+}
+
+/* Donut Chart visual styles */
+.donut-chart-container {
+  height: 200px;
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.custom-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  font-size: 0.8rem;
+}
+
+.legend-color {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.legend-label {
+  color: #475569;
+  font-weight: 500;
+  flex-grow: 1;
+}
+
+.legend-percentage {
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.no-legend-data, .empty-table-msg {
+  color: #94a3b8;
+  text-align: center;
+  font-size: 0.8rem;
+  padding: 10px 0;
+}
+
+/* Line Chart Visuals */
+.line-chart-container {
+  height: 220px;
+}
+
+/* Insights layout row */
+.insights-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.row-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.trend-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.trend-up {
+  background-color: #f0fdf4;
+  color: #16a34a;
+}
+
+.trend-down {
+  background-color: #fef2f2;
+  color: #dc2626;
+}
+
+.trend-value {
+  font-weight: 700;
+}
+
+.trend-label {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.yearly-summary {
+  text-align: right;
+}
+
+.yearly-summary h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0d9488;
+  margin: 0;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.bar-chart-container {
+  height: 180px;
+  margin-bottom: 16px;
+}
+
+.bar-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 14px;
+}
+
+.footer-insight-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.footer-insight-badge i {
+  color: #0d9488;
+}
+
+.footer-total-caps {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+}
+
+.footer-total-caps .label {
+  text-transform: uppercase;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.footer-total-caps .val {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+/* Smart Insights Cards List */
+.insights-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.insight-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  background-color: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #f1f5f9;
+}
+
+.insight-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1rem;
+  margin-right: 14px;
+  flex-shrink: 0;
+}
+
+.teal-light-bg {
+  background-color: #e0f2fe;
+  color: #0284c7;
+}
+
+.orange-light-bg {
+  background-color: #fff7ed;
+  color: #f97316;
+}
+
+.insight-content {
+  flex-grow: 1;
+}
+
+.insight-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.insight-content h4 {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.insight-sub {
+  font-size: 0.72rem;
+  color: #64748b;
+  margin: 2px 0 0 0;
+  font-weight: 500;
+}
+
+/* Bottom table styles */
+.table-card {
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+.table-card-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #e2e8f0;
+  margin: 0;
+  align-items: center;
+}
+
+.table-total-badge {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #475569;
+}
+
+.table-total-badge span {
+  color: #0d9488;
+  font-weight: 800;
+}
+
+.table-scroll-container {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.modern-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0;
+}
+
+.modern-table th {
+  background-color: #f8fafc;
+  color: #475569;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 12px 24px;
+  border-bottom: 1px solid #e2e8f0;
   text-align: center;
 }
 
-.text-muted {
-  color: #6c757d;
+.modern-table td {
+  padding: 14px 24px;
+  font-size: 0.88rem;
+  border-bottom: 1px solid #f1f5f9;
+  color: #334155;
+  text-align: center;
 }
 
-.form-container {
-  margin-bottom: 30px;
+.modern-table tbody tr:hover {
+  background-color: #f8fafc;
 }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 100%; /* Ensure full width for responsiveness */
+.text-left {
+  text-align: left !important;
 }
 
-.form-select,
-#searchQuery {
-  width: 100%; /* Use full width for dropdowns and inputs */
-  max-width: 630px; /* Limit maximum width for larger screens */
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 16px; /* Default font size for inputs */
-  box-sizing: border-box; /* Include padding and border in width */
+.font-medium {
+  font-weight: 500;
+  color: #0f172a;
 }
 
-.add_expense {
-  padding: 10px 15px;
-  background-color: #D32F2F; /* Red background */
-  color: white;
-  border: none;
-  border-radius: 4px;
+.price-val {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.btn-delete-row {
+  background: transparent;
+  color: #cbd5e1;
+  border: 1px solid #cbd5e1;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.3s ease;
-  width: auto; /* Default width for buttons */
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
 }
 
-.add_expense:hover {
-  background-color: #C2185B; /* Pinkish-red on hover */
+.btn-delete-row:hover {
+  color: #dc2626;
+  border-color: #fca5a5;
+  background-color: #fef2f2;
 }
 
-.chart-container {
-  width: 100%; /* Use full width for charts */
-  max-width: 800px; /* Limit maximum width for larger screens */
-  height: 400px;
-  margin: 20px auto 0; /* Center the chart container */
+.empty-table-msg {
+  padding: 40px 0 !important;
+  color: #94a3b8;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .container {
-    padding: 15px; /* Reduce padding for smaller screens */
-    margin-top: 20px; /* Reduce top margin for smaller screens */
-  }
+.empty-table-msg i {
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
 
-  .form-select,
-  #searchQuery {
-    font-size: 14px; /* Reduce font size for smaller screens */
-    padding: 8px; /* Reduce padding for smaller screens */
-  }
+.empty-table-msg p {
+  margin: 0;
+  font-weight: 500;
+}
 
-  .add_expense {
-    padding: 8px 12px; /* Reduce padding for smaller screens */
-    font-size: 14px; /* Reduce font size for smaller screens */
-  }
+/* Dashboard Alert box */
+.dash-alert {
+  position: fixed;
+  top: 25px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #ffffff;
+  z-index: 9999;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+  opacity: 0;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+}
 
-  .chart-container {
-    height: 300px; /* Reduce height for smaller screens */
+.dash-alert.success {
+  background-color: #10b981;
+}
+
+.dash-alert.error {
+  background-color: #ef4444;
+}
+
+/* Responsiveness */
+@media (max-width: 1100px) {
+  .workspace-grid {
+    grid-template-columns: 1fr;
+  }
+  .insights-row {
+    grid-template-columns: 1fr;
   }
 }
 
-@media (max-width: 480px) {
-  .container {
-    padding: 10px; /* Further reduce padding for very small screens */
-    margin-top: 15px; /* Further reduce top margin for very small screens */
+@media (max-width: 900px) {
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
-
-  .form-select,
-  #searchQuery {
-    max-width: 300px; /* Further limit width for very small screens */
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
   }
-
-  .add_expense {
-    width: 100%; /* Make the button full-width for very small screens */
+  .header-right {
+    width: 100%;
   }
+  .search-group .input-wrapper input {
+    width: 100%;
+  }
+}
 
-  .chart-container {
-    height: 300px; /* Further reduce height for very small screens */
+@media (max-width: 550px) {
+  .kpi-grid {
+    grid-template-columns: 1fr;
+  }
+  .header-right {
+    flex-direction: column;
+    width: 100%;
+  }
+  .input-wrapper input {
+    width: 100%;
   }
 }
 </style>
-
 {% endblock %}
