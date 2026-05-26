@@ -17,6 +17,26 @@
       href="{{ url_for('static', filename='images/favicon.ico') }}"
     />
     <script>
+      (function() {
+        const theme = localStorage.getItem('theme') || 'light';
+        if (theme === 'dark') {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+      function toggleTheme() {
+        const html = document.documentElement;
+        const isDark = html.classList.contains('dark');
+        const nextTheme = isDark ? 'light' : 'dark';
+        if (nextTheme === 'dark') {
+          html.classList.add('dark');
+        } else {
+          html.classList.remove('dark');
+        }
+        localStorage.setItem('theme', nextTheme);
+        window.dispatchEvent(new CustomEvent('theme-changed', { detail: { theme: nextTheme } }));
+      }
+    </script>
+    <script>
       tailwind.config = {
         theme: {
           extend: {
@@ -43,6 +63,82 @@
           0 4px 6px -1px rgba(15, 23, 42, 0.06),
           0 12px 24px -4px rgba(15, 23, 42, 0.08);
         --shadow-float: 0 24px 48px -12px rgba(15, 23, 42, 0.12);
+        --btn-primary-bg: #0f172a;
+        --btn-primary-text: #ffffff;
+        --btn-primary-hover: #1e293b;
+        --footer-bg: #0f172a;
+      }
+
+      html.dark {
+        --primary: #f8fafc;
+        --accent: #f59e0b;
+        --accent-hover: #fbbf24;
+        --accent-muted: rgba(245, 158, 11, 0.25);
+        --bg: #0f172a;
+        --text: #f1f5f9;
+        --secondary: #94a3b8;
+        --card: #1e293b;
+        --line: #334155;
+        --primary-soft: rgba(248, 250, 252, 0.1);
+        --shadow-card:
+          0 4px 6px -1px rgba(0, 0, 0, 0.3),
+          0 12px 24px -4px rgba(0, 0, 0, 0.4);
+        --shadow-float: 0 24px 48px -12px rgba(0, 0, 0, 0.5);
+        --btn-primary-bg: #f59e0b;
+        --btn-primary-text: #0f172a;
+        --btn-primary-hover: #fbbf24;
+        --footer-bg: #0b0f19;
+      }
+
+      /* Theme Toggle Styles */
+      .theme-toggle-btn {
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--secondary);
+        transition: background-color 0.2s, transform 0.2s, color 0.2s;
+        outline: none;
+      }
+
+      .theme-toggle-btn:hover {
+        background-color: var(--primary-soft);
+        transform: rotate(15deg);
+        color: var(--primary);
+      }
+
+      .theme-toggle-btn .sun-icon {
+        display: none;
+      }
+
+      .theme-toggle-btn .moon-icon {
+        display: block;
+      }
+
+      html.dark .theme-toggle-btn .sun-icon {
+        display: block;
+        color: #fbbf24;
+      }
+
+      html.dark .theme-toggle-btn .moon-icon {
+        display: none;
+      }
+
+      html.dark .text-emerald-700 {
+        color: #34d399 !important;
+      }
+      html.dark .bg-emerald-50 {
+        background-color: rgba(16, 185, 129, 0.15) !important;
+      }
+      html.dark .text-rose-700 {
+        color: #fb7185 !important;
+      }
+      html.dark .bg-rose-50 {
+        background-color: rgba(244, 63, 94, 0.15) !important;
       }
 
       html {
@@ -98,6 +194,20 @@
           radial-gradient(
             at 100% 100%,
             rgba(15, 23, 42, 0.06) 0%,
+            transparent 45%
+          );
+      }
+
+      html.dark .hero-canvas {
+        background-image:
+          radial-gradient(
+            at 0% 0%,
+            rgba(245, 158, 11, 0.15) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            at 100% 100%,
+            rgba(248, 250, 252, 0.05) 0%,
             transparent 45%
           );
       }
@@ -201,37 +311,71 @@
                 class="nav-link text-sm font-semibold focus-ring rounded-md py-1"
                 >Login</a
               >
+              <button onclick="toggleTheme()" class="theme-toggle-btn" aria-label="Toggle dark mode">
+                <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="5"></circle>
+                  <line x1="12" y1="1" x2="12" y2="3"></line>
+                  <line x1="12" y1="21" x2="12" y2="23"></line>
+                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                  <line x1="1" y1="12" x2="3" y2="12"></line>
+                  <line x1="21" y1="12" x2="23" y2="12"></line>
+                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+                <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+              </button>
               <a
                 href="{{ url_for('register') }}"
-                class="inline-flex items-center justify-center rounded-full bg-[var(--primary)] text-white px-5 py-2.5 text-sm font-bold shadow-sm hover:bg-[#1e293b] transition-colors focus-ring"
+                class="inline-flex items-center justify-center rounded-full bg-[var(--btn-primary-bg)] text-[var(--btn-primary-text)] px-5 py-2.5 text-sm font-bold shadow-sm hover:bg-[var(--btn-primary-hover)] transition-colors focus-ring"
               >
                 Get Started
               </a>
             </div>
 
-            <button
-              type="button"
-              id="menu-toggle"
-              class="md:hidden flex h-10 w-10 items-center justify-center rounded-xl text-[var(--primary)] hover:bg-[var(--primary-soft)] focus-ring"
-              aria-expanded="false"
-              aria-controls="mobile-menu"
-              aria-label="Open menu"
-            >
-              <svg
-                class="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
+            <div class="flex items-center gap-2 md:hidden">
+              <button onclick="toggleTheme()" class="theme-toggle-btn" aria-label="Toggle dark mode">
+                <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="5"></circle>
+                  <line x1="12" y1="1" x2="12" y2="3"></line>
+                  <line x1="12" y1="21" x2="12" y2="23"></line>
+                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                  <line x1="1" y1="12" x2="3" y2="12"></line>
+                  <line x1="21" y1="12" x2="23" y2="12"></line>
+                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+                <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+              </button>
+              <button
+                type="button"
+                id="menu-toggle"
+                class="flex h-10 w-10 items-center justify-center rounded-xl text-[var(--primary)] hover:bg-[var(--primary-soft)] focus-ring"
+                aria-expanded="false"
+                aria-controls="mobile-menu"
+                aria-label="Open menu"
               >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
-            </button>
+                <svg
+                  class="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -259,7 +403,7 @@
             >
             <a
               href="{{ url_for('register') }}"
-              class="mt-2 block text-center rounded-full bg-[var(--primary)] text-white px-6 py-3 font-bold hover:bg-[#1e293b] transition-colors focus-ring"
+              class="mt-2 block text-center rounded-full bg-[var(--btn-primary-bg)] text-[var(--btn-primary-text)] px-6 py-3 font-bold hover:bg-[var(--btn-primary-hover)] transition-colors focus-ring"
             >
               Get Started
             </a>
@@ -935,7 +1079,7 @@
               <button
                 type="button"
                 id="purchaseBtn"
-                class="relative z-[1] mt-8 w-full rounded-xl bg-[var(--primary)] text-white px-6 py-3.5 font-bold hover:bg-[#1e293b] transition-colors focus-ring"
+                class="relative z-[1] mt-8 w-full rounded-xl bg-[var(--btn-primary-bg)] text-[var(--btn-primary-text)] px-6 py-3.5 font-bold hover:bg-[var(--btn-primary-hover)] transition-colors focus-ring"
               >
                 Purchase (in progress)
               </button>
@@ -945,7 +1089,7 @@
       </section>
     </main>
 
-    <footer class="bg-[var(--primary)] text-[#94a3b8] py-12" role="contentinfo">
+    <footer class="bg-[var(--footer-bg)] text-[#94a3b8] py-12" role="contentinfo">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-10 items-start">
           <div>

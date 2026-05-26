@@ -14,6 +14,60 @@
     --auth-radius-pill: 9999px;
 }
 
+html.dark {
+    --auth-primary: #f8fafc;
+    --auth-accent: #f59e0b;
+    --auth-accent-hover: #fbbf24;
+    --auth-bg: #0f172a;
+    --auth-text: #f1f5f9;
+    --auth-muted: #94a3b8;
+    --auth-card: #1e293b;
+    --auth-line: #334155;
+    --auth-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+}
+
+/* Auth Theme Toggle Button */
+.auth-theme-toggle {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    z-index: 100;
+    background: var(--auth-card);
+    border: 1.5px solid var(--auth-line);
+    color: var(--auth-text);
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px var(--auth-shadow);
+    transition: all 0.2s ease;
+    outline: none;
+}
+
+.auth-theme-toggle:hover {
+    background-color: var(--auth-bg);
+    transform: rotate(15deg);
+}
+
+.auth-theme-toggle .sun-icon {
+    display: none;
+}
+
+.auth-theme-toggle .moon-icon {
+    display: block;
+}
+
+html.dark .auth-theme-toggle .sun-icon {
+    display: block;
+    color: #fbbf24;
+}
+
+html.dark .auth-theme-toggle .moon-icon {
+    display: none;
+}
+
 *,
 *::before,
 *::after {
